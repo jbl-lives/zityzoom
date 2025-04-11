@@ -20,8 +20,8 @@ function Header({userInput}:any) {
           type="text"
            onChange={(e)=>setSearchInput(e.target.value)}
           placeholder="Search Anything"
-          className="input bg-white p-2.5 z-10  rounded-full
-                    px-5 w-[600px] shadow-sm outline-rose-600 focus:border-rose-600"
+          className="input bg-white p-3 z-10  rounded-full
+                    px-5 w-[600px] shadow-sm outline-rose-400 focus:border-rose-400"
         />
         <button
           onClick={()=>userInput(searchInput)}
@@ -34,7 +34,7 @@ function Header({userInput}:any) {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="size-6 text-white"
+            className="size-5 text-white"
           >
             <path
               strokeLinecap="round"
@@ -45,11 +45,11 @@ function Header({userInput}:any) {
         </button>
       </div>
       <ul className="flex gap-8 items-center ">
-        <li className="text-[18px] hover:text-rose-600 cursor-pointer">Home</li>
-        <li className="text-[18px] hover:text-rose-600 cursor-pointer">
+        <li className="text-[16px] hover:text-rose-600 cursor-pointer">Home</li>
+        <li className="text-[16px] hover:text-rose-600 cursor-pointer">
           About Us
         </li>
-        <li className="text-[18px] hover:text-rose-600 cursor-pointer">
+        <li className="text-[16px] hover:text-rose-600 cursor-pointer">
           Contact Us
         </li>
       </ul>
