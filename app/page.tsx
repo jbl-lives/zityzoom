@@ -5,6 +5,7 @@ import PlaceList from "@/components/PlaceList";
 import Header from "@/components/Header";
 import PlaceIcons from "@/components/PlaceIcons";
 import MapPanel from "@/components/MapPanel";
+import Script from 'next/script';
 
 export default function Home() {
   const [placeList, setPlaceList] = useState([]);
@@ -41,7 +42,12 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-full">
+    <>
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyA6rT8Jea8UIGbupwx2jQfFBt4plm8iDhM&libraries=places`}
+        strategy="beforeInteractive"
+      />
+      <div className="h-screen w-full">
       <Header userInput={getPlaceList} />
       <div className="flex w-full bg-slate-200 p-2 pr-4 h-[89vh]">
         <div className="w-[7%] h-full">
@@ -53,14 +59,27 @@ export default function Home() {
               <PlaceList placeList={placeList} onSelectPlace={handlePlaceSelection} />
             )}
           </div>
-          <div className="w-[55%]">
+          <div className="w-[55%] h-full bg-red-500">
+
             {(selectedPlace?.geometry?.location || currentLocation) ? (
               <MapPanel
-                location={
-                  selectedPlace?.geometry?.location ??
-                  currentLocation
-                }
-              />
+              userLocation={
+                selectedPlace?.geometry?.location
+                  ? {
+                      lat: typeof selectedPlace.geometry.location.lat === 'function'
+                        ? selectedPlace.geometry.location.lat()
+                        : selectedPlace.geometry.location.lat,
+                      lng: typeof selectedPlace.geometry.location.lng === 'function'
+                        ? selectedPlace.geometry.location.lng()
+                        : selectedPlace.geometry.location.lng,
+                    }
+                  : currentLocation
+              }
+              
+              
+              placeList={placeList}
+            />
+            
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-500">
                 Loading map...
@@ -72,5 +91,13 @@ export default function Home() {
       </div>
      
     </div>
+    </>
   );
+  
+
+
 }
+
+
+
+
