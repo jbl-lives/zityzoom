@@ -10,7 +10,7 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
       {category.map((item) => (
        <div
             key={item.name}
-            onClick={() => onSelectCategory(item.name)}
+            onClick={() => onSelectCategory(item.keyword)}
             className="group relative icon w-[40px] h-[40px] p-2 rounded-full cursor-pointer hover:border-rose-600 hover:scale-110 transition-all"
         >
        <Image src={item.icon} alt={item.name} width={30} height={30} />

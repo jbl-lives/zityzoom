@@ -13,9 +13,7 @@ export default function Home() {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
-    getPlaceList("Hotels in Johannesburg");
-
-    // Fetch user location
+    // Fetch user location only once on mount
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -26,16 +24,53 @@ export default function Home() {
         },
         (err) => {
           console.warn("Could not get location, using default.", err);
+          // Optional: set a default fallback location
+          setCurrentLocation({
+            lat: -26.2041, // Johannesburg
+            lng: 28.0473,
+          });
         }
       );
     }
   }, []);
+  
+  // Call API when location becomes available
+  useEffect(() => {
+    if (currentLocation) {
+      getPlaceList("Restaurants"); // 🔥 Uses current location automatically inside getPlaceList
+    }
+  }, [currentLocation]);
+  
 
-  const getPlaceList = async (value: string) => {
-    const result = await fetch("/api/google-place-api?q=" + value);
-    const data = await result.json();
-    setPlaceList(data.resp.results);
+  const getPlaceList = async (keyword: string) => {
+    if (!currentLocation) return;
+  
+    const { lat, lng } = currentLocation;
+  
+    try {
+      const result = await fetch(
+        `/api/google-place-api?keyword=${encodeURIComponent(keyword)}&lat=${lat}&lng=${lng}`
+      );
+  
+      const data = await result.json();
+      console.log("Fetched data:", data);
+  
+      if (data.resp && data.resp.results) {
+        setPlaceList(data.resp.results);
+      } else {
+        console.warn("No results returned", data);
+        setPlaceList([]); // Clear UI just in case
+      }
+  
+      setSelectedPlace(null);
+    } catch (error) {
+      console.error("Error fetching places:", error);
+    }
   };
+  
+  
+  
+  
 
   const handlePlaceSelection = (place: any) => {
     setSelectedPlace(place);
@@ -59,7 +94,7 @@ export default function Home() {
               <PlaceList placeList={placeList} onSelectPlace={handlePlaceSelection} />
             )}
           </div>
-          <div className="w-[55%] h-full bg-red-500">
+          <div className="w-[55%] h-full ">
 
             {(selectedPlace?.geometry?.location || currentLocation) ? (
               <MapPanel
@@ -75,10 +110,10 @@ export default function Home() {
                     }
                   : currentLocation
               }
-              
-              
               placeList={placeList}
+              selectedPlaceId={selectedPlace?.place_id} // ✅ add this line!
             />
+            
             
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-500">

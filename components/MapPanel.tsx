@@ -5,9 +5,11 @@ import { useEffect, useRef } from "react";
 type Props = {
   userLocation: { lat: number; lng: number } | null;
   placeList: any[];
+  selectedPlaceId?: string;
 };
 
-export default function MapPanel({ userLocation, placeList }: Props) {
+
+export default function MapPanel({ userLocation, placeList, selectedPlaceId }: Props) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<google.maps.Map | null>(null);
   const directionsRenderer = useRef<google.maps.DirectionsRenderer | null>(null);
@@ -42,7 +44,17 @@ export default function MapPanel({ userLocation, placeList }: Props) {
           position: place.geometry.location,
           map,
           title: place.name,
+          icon: place.place_id === selectedPlaceId
+            ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png" // selected pin
+            : undefined, // default pin
         });
+        
+        if (place.place_id === selectedPlaceId) {
+          map.setCenter(place.geometry.location);
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(() => marker.setAnimation(null), 1400); // stop bounce
+        }
+        
 
         marker.addListener("click", () => {
           const service = new google.maps.places.PlacesService(map);

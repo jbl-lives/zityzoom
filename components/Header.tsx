@@ -3,7 +3,7 @@ import Image from 'next/image';
 import React, { useState } from 'react'
 
 function Header({userInput}:any) {
-  const [searchInput,setSearchInput]=useState<string>();
+  const [searchInput, setSearchInput] = useState<string>("");
   return (
     <div className="flex justify-between p-3 px-5 shadow-sm bg-slate-200">
       <div className="flex gap-3 items-center ">
@@ -16,18 +16,28 @@ function Header({userInput}:any) {
         </h2>
       </div>
       <div className="  flex gap-2 items-center justify-center">
-        <input
-          type="text"
-           onChange={(e)=>setSearchInput(e.target.value)}
-          placeholder="Search Anything"
-          className="input bg-white p-3 z-10  rounded-full
-                    px-5 w-[600px] shadow-sm outline-rose-400 focus:border-rose-400"
-        />
-        <button
-          onClick={()=>userInput(searchInput)}
-          className="bg-rose-500 rounded-full p-3 shadow-md
-                    z-10 cursor-pointer hover:scale-90 transition-all"
-        >
+      <input
+        type="text"
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value) }
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') userInput(searchInput);
+          console.log("Search triggered:", searchInput);
+
+        }}
+        
+        placeholder="Search Anything"
+        className="input bg-white p-3 z-10 rounded-full px-5 w-[600px] shadow-sm outline-rose-400 focus:border-rose-400"
+      />
+
+<button
+  disabled={!searchInput.trim()}
+  onClick={() => userInput(searchInput)}
+  className={`bg-rose-500 rounded-full p-3 shadow-md z-10 cursor-pointer transition-all ${
+    !searchInput.trim() ? "opacity-50 cursor-not-allowed" : "hover:scale-90"
+  }`}
+>
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
