@@ -8,7 +8,6 @@ type Props = {
   selectedPlaceId?: string;
 };
 
-
 export default function MapPanel({ userLocation, placeList, selectedPlaceId }: Props) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<google.maps.Map | null>(null);
@@ -45,16 +44,15 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
           map,
           title: place.name,
           icon: place.place_id === selectedPlaceId
-            ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png" // selected pin
-            : undefined, // default pin
+            ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            : undefined,
         });
-        
+
         if (place.place_id === selectedPlaceId) {
           map.setCenter(place.geometry.location);
           marker.setAnimation(google.maps.Animation.BOUNCE);
-          setTimeout(() => marker.setAnimation(null), 1400); // stop bounce
+          setTimeout(() => marker.setAnimation(null), 1400);
         }
-        
 
         marker.addListener("click", () => {
           const service = new google.maps.places.PlacesService(map);
@@ -66,7 +64,17 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
                   ${details.formatted_address || ""}<br/>
                   ${details.formatted_phone_number || ""}<br/>
                   <em>${details.opening_hours?.weekday_text?.join("<br/>") || ""}</em><br/>
-                  <button id="dir-btn">Get Directions</button>
+                  <button id="dir-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                  </svg>
+
+                  </button>
+                  <button id="share-btn" style="margin-top: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+                    </svg>
+                  </button>
                 </div>
               `;
               infoWindow.setContent(content);
@@ -74,14 +82,16 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
 
               setTimeout(() => {
                 const dirBtn = document.getElementById("dir-btn");
+                const shareBtn = document.getElementById("share-btn");
                 const destination = details.geometry?.location;
-              
+
+                // Directions button logic
                 if (dirBtn && destination) {
                   dirBtn.addEventListener("click", () => {
                     directionsService.route(
                       {
                         origin: userLocation,
-                        destination, // safe now
+                        destination,
                         travelMode: google.maps.TravelMode.DRIVING,
                       },
                       (result, status) => {
@@ -94,8 +104,26 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
                     );
                   });
                 }
+
+                // Share button logic
+                if (shareBtn && details.url) {
+                  shareBtn.addEventListener("click", () => {
+                    const shareText = `Check out this place: ${details.name}\n${details.url}`;
+                    if (navigator.share) {
+                      navigator.share({
+                        title: details.name,
+                        text: shareText,
+                        url: details.url,
+                      }).catch(err => console.error("Error sharing:", err));
+                    } else {
+                      navigator.clipboard.writeText(shareText)
+                        .then(() => alert("Link copied to clipboard!"))
+                        .catch(() => alert("Failed to copy the link."));
+                    }
+                  });
+                }
+
               }, 300);
-              
             }
           });
         });
@@ -105,7 +133,7 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
     };
 
     initMap();
-  }, [userLocation, placeList]);
+  }, [userLocation, placeList, selectedPlaceId]);
 
   return <div ref={mapRef} className="w-full h-full rounded-xl" />;
 }

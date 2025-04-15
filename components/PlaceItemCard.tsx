@@ -7,6 +7,7 @@ interface PlaceItemCardProps {
     place: {
       name: string;
       vicinity?: string;
+      formatted_address?: string;
       rating?: number;
       user_ratings_total?: number;
       photos?: {
@@ -48,7 +49,9 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                     </svg>
 
-                    <h2 className='text-[0.84rem] text-gray-600 line-clamp-2'>{place?.vicinity || 'Address unavailable'}</h2>
+                    <h2 className='text-[0.84rem] text-gray-600 line-clamp-2'>{place.vicinity || place.formatted_address || "Address unavailable"}</h2>
+                    
+
 
                 </div>
 
