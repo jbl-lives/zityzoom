@@ -37,40 +37,44 @@ export default function Home() {
   // Call API when location becomes available
   useEffect(() => {
     if (currentLocation) {
-      getPlaceList("Restaurants"); // 🔥 Uses current location automatically inside getPlaceList
+      fetchPlacesByCategory("Restaurants"); // 🔥 Uses current location automatically inside getPlaceList
     }
   }, [currentLocation]);
   
 
-  const getPlaceList = async (keyword: string) => {
+  const fetchPlacesByCategory = async (category: string) => {
     if (!currentLocation) return;
-  
+
     const { lat, lng } = currentLocation;
-  
+
     try {
       const result = await fetch(
-        `/api/google-place-api?keyword=${encodeURIComponent(keyword)}&lat=${lat}&lng=${lng}`
+        `/api/google-place-api?keyword=${encodeURIComponent(category)}&lat=${lat}&lng=${lng}&locationBias=true`
       );
-  
       const data = await result.json();
-      console.log("Fetched data:", data);
-  
-      if (data.resp && data.resp.results) {
-        setPlaceList(data.resp.results);
-      } else {
-        console.warn("No results returned", data);
-        setPlaceList([]); // Clear UI just in case
-      }
-  
+      console.log("Category fetch:", data);
+      setPlaceList(data.resp?.results || []);
       setSelectedPlace(null);
     } catch (error) {
-      console.error("Error fetching places:", error);
+      console.error("Error fetching category places:", error);
     }
   };
+
   
-  
-  
-  
+
+  const searchPlacesByQuery = async (query: string) => {
+    try {
+      const result = await fetch(
+        `/api/google-place-api?keyword=${encodeURIComponent(query)}&locationBias=false` // No lat/lng for general search
+      );
+      const data = await result.json();
+      console.log("Search fetch:", data);
+      setPlaceList(data.resp?.results || []);
+      setSelectedPlace(null);
+    } catch (error) {
+      console.error("Error searching places:", error);
+    }
+  };
 
   const handlePlaceSelection = (place: any) => {
     setSelectedPlace(place);
@@ -83,10 +87,10 @@ export default function Home() {
         strategy="beforeInteractive"
       />
       <div className="h-screen w-full">
-      <Header userInput={getPlaceList} />
+      <Header userInput={searchPlacesByQuery} />
       <div className="flex w-full bg-slate-200 p-2 pr-4 h-[89vh]">
         <div className="w-[7%] h-full">
-          <PlaceIcons onSelectCategory={getPlaceList} />
+          <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
         </div>
         <div className="flex w-[93%] rounded-3xl h-full bg-white p-4 gap-4">
           <div className="w-[45%] overflow-y-scroll">
