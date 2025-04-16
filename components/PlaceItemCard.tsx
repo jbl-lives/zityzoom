@@ -32,7 +32,7 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
                         : "/placeholder.jpg"
                     }
                     alt="place image"
-                    width={170}
+                    width={100}
                     height={100}
                     className=" w-full h-full flex-shrink-0 object-cover rounded-xl"
                     key={place?.photos?.[0]?.photo_reference || place?.place_id}
