@@ -64,8 +64,12 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
                   <span style="color:#585858;">${details.formatted_address || ""}</span><br/>
                   <span style="color:#005ce6;">${details.formatted_phone_number || ""}</span><br/>
                   <em>${details.opening_hours?.weekday_text?.join("<br/>") || ""}</em><br/>
-                  <button id="dir-btn">Directions</button>
-                  <button id="share-btn" style="margin-top: 5px;">Share</button>
+                  <button id="dir-btn" style="background-color:green; padding:5px; color:#fff; margin-top:7px;">
+                    Directions
+                  </button>
+                  <button id="share-btn" style="margin-top:7px; margin-left:10px; padding:5px; background-color:blue; color:#fff;">
+                    Share
+                  </button>
                 </div>
               `;
               infoWindow.setContent(content);
@@ -79,20 +83,14 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
                 // Directions button logic
                 if (dirBtn && destination) {
                   dirBtn.addEventListener("click", () => {
-                    directionsService.route(
-                      {
-                        origin: userLocation,
-                        destination,
-                        travelMode: google.maps.TravelMode.DRIVING,
-                      },
-                      (result, status) => {
-                        if (status === "OK" && result) {
-                          directionsRenderer.current!.setDirections(result);
-                        } else {
-                          alert("Could not get directions.");
-                        }
-                      }
-                    );
+                    const destLat = destination.lat();
+                    const destLng = destination.lng();
+                    const originLat = userLocation.lat;
+                    const originLng = userLocation.lng;
+
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
+                    window.open(mapsUrl, '_blank');
+
                   });
                 }
 

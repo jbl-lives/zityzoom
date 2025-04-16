@@ -3,6 +3,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react'
 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { Button } from "@/components/ui/button";
+import { usePathname } from 'next/navigation';
+
 
 function Header({userInput}:any) {
   const [searchInput, setSearchInput] = useState<string>("");
@@ -60,24 +73,38 @@ function Header({userInput}:any) {
         </button>
       </div>
 
-      <button className='nav-btn  flex items-center justify-center  p-3 shadow-md z-10 cursor-pointer transition-all'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
-        </svg>
-      </button>
+      <Drawer>
+  <DrawerTrigger asChild>
+    <button className='nav-btn flex items-center justify-center p-3 shadow-md z-10 cursor-pointer transition-all'>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={1.5} stroke="currentColor" className="size-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+      </svg>
+    </button>
+  </DrawerTrigger>
 
-      {/**Desktop Navigation */}
-      <ul className="hidden  gap-8 items-center ">
-        <li className="text-[16px] hover:text-rose-600 cursor-pointer">
-          <Link href="/">Home</Link>
-        </li>
-        <li className="text-[16px] hover:text-rose-600 cursor-pointer">
-          <Link href="/about">About Us</Link>
-        </li>
-        <li className="text-[16px] hover:text-rose-600 cursor-pointer">
-          <Link href="/contact">Contact Us</Link>
-        </li>
-      </ul>
+  <DrawerContent className="md:pb-10 py:4 md:px-20 px-4">
+    <DrawerHeader>
+      <DrawerTitle className='text-[1.5rem]'>About</DrawerTitle>
+      <DrawerDescription className='text-[1rem] '>
+         ZittyZoom helps travelers explore cities with ease — find nearby 
+         hotels, restaurants, gas stations, and hotspots instantly. More 
+         than just directions — it’s your city, zoomed in.
+      </DrawerDescription>
+    </DrawerHeader>
+
+    
+
+    <DrawerFooter className="mt-4">
+      <DrawerClose asChild>
+        <Button variant="outline" className="w-full">Close</Button>
+      </DrawerClose>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>
+
+
+     
 
       {/**Mobile Search*/}
       <div className=" w-full flex md:hidden mt-3 gap-2 items-center justify-center">
