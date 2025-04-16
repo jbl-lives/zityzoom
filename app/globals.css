@@ -41,6 +41,20 @@ body {
   
 }
 
+.nav-btn{
+  border-radius: 50px;
+  background: #e2e8f0;
+  box-shadow:  20px 20px 60px #c0c5cc,
+              -20px -20px 60px #ffffff;
+  transition: all 0.5s ease-in-out;
+}
+
+.nav-btn:hover{
+  background: #e2e8f0;
+  box-shadow:  10px 10px 30px #c0c5cc,
+              -10px -10px 30px #ffffff;
+  
+}
 
 .icon{
   background-color: #e0e8ef;

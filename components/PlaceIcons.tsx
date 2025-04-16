@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) => void }) => {
   return (
-    <div className="flex flex-col items-center bg-slate-200 p-3 gap-4">
+    <div className="flex md:flex-col items-center bg-slate-200 p-3 gap-4">
       {category.map((item) => (
        <div
             key={item.name}

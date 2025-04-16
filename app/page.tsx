@@ -60,8 +60,6 @@ export default function Home() {
     }
   };
 
-  
-
   const searchPlacesByQuery = async (query: string) => {
     try {
       const result = await fetch(
@@ -88,17 +86,18 @@ export default function Home() {
       />
       <div className="h-screen w-full">
       <Header userInput={searchPlacesByQuery} />
-      <div className="flex w-full bg-slate-200 p-2 pr-4 h-[89vh]">
-        <div className="w-[7%] h-full">
+      <div className="flex w-full bg-slate-200 md:p-2 flex-wrap-reverse md:pr-4 pr-1 p-0 h-[89vh]">
+        <div className="md:w-[7%] md:h-full w-full h-[6%]">
           <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
         </div>
-        <div className="flex w-[93%] rounded-3xl h-full bg-white p-4 gap-4">
-          <div className="w-[45%] overflow-y-scroll">
+        <div className="flex md:flex-nowrap flex-wrap-reverse md:w-[93%] w-full 
+        rounded-3xl md:h-full h-[90%] md:bg-white bg-none md:p-4 p-2 gap-4 ">
+          <div className="md:w-[45%] w-full md:h-full h-[50%] md:bg-none bg-white overflow-y-scroll ">
             {placeList.length > 0 && (
               <PlaceList placeList={placeList} onSelectPlace={handlePlaceSelection} />
             )}
           </div>
-          <div className="w-[55%] h-full ">
+          <div className="md:w-[55%]  w-full md:h-full h-[45%] ">
 
             {(selectedPlace?.geometry?.location || currentLocation) ? (
               <MapPanel
