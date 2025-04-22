@@ -85,14 +85,18 @@ export default function Home() {
         strategy="beforeInteractive"
       />
       <div className="h-screen w-full">
-      <Header userInput={searchPlacesByQuery} />
+      <Header
+        userInput={searchPlacesByQuery}
+        currentLocation={currentLocation}
+        onCategorySelect={fetchPlacesByCategory} // New prop
+      />
       <div className="flex w-full bg-slate-200 md:p-2 flex-wrap-reverse md:pr-4 pr-1 p-0 md:h-[89vh] h-[80vh]">
-        <div className="md:w-[7%] md:h-full w-full h-[6%]">
+        <div className="md:w-[7%] md:h-full w-full h-[6%] md:flex hidden">
           <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
         </div>
         <div className="flex md:flex-nowrap flex-wrap-reverse md:w-[93%] w-full 
-        rounded-3xl md:h-full h-[90%] md:bg-white bg-none md:p-4 p-2 gap-4 ">
-          <div className="md:w-[45%] w-full md:h-full h-[60%] md:bg-none bg-white overflow-y-scroll ">
+        rounded-3xl md:h-full h-[97%] md:bg-white bg-none md:p-4 p-2 gap-4 ">
+          <div className="md:w-[45%] w-full md:h-full h-[60%] rounded-2xl py-2 md:bg-none bg-white overflow-y-scroll ">
             {placeList.length > 0 && (
               <PlaceList placeList={placeList} onSelectPlace={handlePlaceSelection} />
             )}
@@ -120,7 +124,8 @@ export default function Home() {
             
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-500">
-                Loading map...
+                <span className="loader"></span>
+                
               </div>
             )}
           </div>

@@ -24,7 +24,7 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
             p-2 z-10 rounded-xl shadow-xl/20 bg-white cursor-pointer 
             hover:translate-x-2 transition-all duration-75'>
 
-            <div className="w-[10rem]  h-[90%]">
+            <div className="md:w-[10rem]  md:h-[90%] w-[7rem] h-[90%] flex-shrink-0 rounded-xl overflow-hidden">
                 <Image
                     src={
                     place?.photos && place.photos[0]?.photo_reference
