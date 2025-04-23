@@ -35,6 +35,13 @@ function Header({ userInput, currentLocation,  onCategorySelect }: {
   onCategorySelect: (category: string) => void
 }) {
   const [searchInput, setSearchInput] = useState("");
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+
+  const handleCategorySelect = (category: string) => {
+    console.log("Selected category from Sheet:", category);
+    onCategorySelect(category); // Call the function passed from Home
+    setIsCategorySheetOpen(false); // Close the sheet after selection
+  };
 
   return (
     <div className="flex justify-between p-3 px-5 flex-wrap shadow-sm bg-slate-200">
@@ -200,12 +207,8 @@ function Header({ userInput, currentLocation,  onCategorySelect }: {
 
             {/* Import and render PlaceIcons component */}
             
-            <div className="border border-red-500">
-              <PlaceIcons onSelectCategory={(val) => {
-                console.log("Selected category:", val);
-                onCategorySelect(val);
-               
-              }} />
+            <div className="border ">
+              <PlaceIcons onSelectCategory={handleCategorySelect} />
             </div>
 
 
