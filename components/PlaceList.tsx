@@ -21,7 +21,7 @@ function PlaceList({ placeList, onSelectPlace }: any) {
 
   return (
     <div className="flex flex-wrap px-[10px] ">
-      <h2 className="text-[20px] font-bold text-rose-400 mb-2 pt-4">Search Results</h2>
+      
       <div className="w-full gap-4 shrink-0">
         {placeList.map((place: any, index: number) => (
           index <= 7 && (

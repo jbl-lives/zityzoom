@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+References: 
+<a href="https://www.flaticon.com/free-icons/restaurant" title="restaurant icons">Restaurant icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/fuel" title="fuel icons">Fuel icons created by Kiranshastry - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/single-bed" title="single bed icons">Single bed icons created by dwiangga.icon  - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/beers" title="beers icons">Beers icons created by juicy_fish - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/hotel" title="hotel icons">Hotel icons created by Retinaicons - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/bank" title="bank icons">Bank icons created by Freepik - Flaticon</a>

@@ -21,10 +21,10 @@ interface PlaceItemCardProps {
 function PlaceItemCard({ place }: PlaceItemCardProps) {
     return (
         <div className='place-card shrink-0 mt-3 flex w-full h-[130px] items-center gap-3 
-            p-2 z-10 rounded-xl shadow-xl/20 bg-white cursor-pointer 
-            hover:translate-x-2 transition-all duration-75'>
+            p-2 z-1  shadow-xl/20 bg-white cursor-pointer 
+            hover:translate-x-2 transition-all duration-75 overflow-hidden'>
 
-            <div className="md:w-[10rem]  md:h-[90%] w-[7rem] h-[90%] flex-shrink-0 rounded-xl overflow-hidden">
+            <div className="md:w-[10rem]  md:h-[90%] w-[7rem] h-[90%] flex-shrink-0  overflow-hidden">
                 <Image
                     src={
                     place?.photos && place.photos[0]?.photo_reference
@@ -34,13 +34,13 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
                     alt="place image"
                     width={100}
                     height={100}
-                    className=" w-full h-full flex-shrink-0 object-cover rounded-xl"
+                    className=" w-full h-full flex-shrink-0 object-cover "
                     key={place?.photos?.[0]?.photo_reference || place?.place_id}
                 />
             </div>
             
             <div className='p-2 w-[70%] '>
-                <h2 className='line-clamp-2 font-semibold truncate'>{place?.name}</h2>
+                <h2 className='line-clamp-2 font-semibold pb-2 truncate border-b-1 border-gray-100'>{place?.name}</h2>
                 <div className='flex gap-2 mt-1.5 items-start'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
@@ -56,14 +56,14 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
                 </div>
 
                 <div className='flex gap-2 mt-2'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
                     className="w-5 h-5 flex-shrink-0 text-yellow-500">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                     </svg>
                     <h2 className=' text-[0.85rem] text-gray-400 line-clamp-2 tracking-wider flex'>
                     {place?.rating ? place.rating : "No rating"}
 
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
                         className="w-5 h-5 flex-shrink-0 ml-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                         </svg>

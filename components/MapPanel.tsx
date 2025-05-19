@@ -124,5 +124,5 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
     initMap();
   }, [userLocation, placeList, selectedPlaceId]);
 
-  return <div ref={mapRef} className="w-full h-full rounded-xl" />;
+  return <div ref={mapRef} className="w-full h-full rounded-2xl border-2 border-white" />;
 }

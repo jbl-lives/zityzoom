@@ -45,15 +45,15 @@
 
 .input{
   outline: none;
-  -webkit-border-radius: 50px;
-  border-radius: 50px;
-  background: #e2e8f0;
+ 
+ 
+  /* background: #e2e8f0;
   -webkit-box-shadow: 12px 12px 24px #c0c5cc, -12px -12px 24px #ffffff;
-  box-shadow: 12px 12px 24px #c0c5cc, -12px -12px 24px #ffffff;
+  box-shadow: 12px 12px 24px #c0c5cc, -12px -12px 24px #ffffff; */
 }
 
 .input:hover{
-  border: 1px solid rgb(165, 0, 54);
+  border: 1px solid rgb(231, 137, 169);
 }
 
 .input:focus{
@@ -63,9 +63,9 @@
 
 .nav-btn{
   border-radius: 50px;
-  background: #e2e8f0;
-  box-shadow:  20px 20px 60px #c0c5cc,
-              -20px -20px 60px #ffffff;
+  /* background: #e2e8f0; */
+  /* box-shadow:  20px 20px 60px #c0c5cc,
+              -20px -20px 60px #ffffff; */
   transition: all 0.5s ease-in-out;
 }
 
@@ -175,7 +175,26 @@
   }
   body {
     @apply bg-background text-foreground;
+    padding: 0 20px !important;
+    background-color: rgb(233, 231, 232,);
+    
   }
+}
+
+.card {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.75);
+    border-radius: 12px;
+    border: 2px solid white
+}
+
+.card-dark {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(17, 25, 40, 0.75);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.125);
 }
 
 
@@ -218,3 +237,29 @@
   100% {  transform: rotate(245deg)}
 }
 
+
+/* globals.css */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff1f2; /* light rose (Tailwind's rose-50) */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #fda4af, #fb7185, #f43f5e); /* rose gradient */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #fb7185, #f43f5e, #e11d48); /* darker rose gradient on hover */
+}
+
+/* Optional: for horizontal scrollbars */
+::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(to right, #fda4af, #fb7185, #f43f5e);
+}

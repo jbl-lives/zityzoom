@@ -1,10 +1,10 @@
 export default [
-  { id: 1, name: "Restaurant", icon: "/restaurant.png", keyword: "restaurant" },
-  { id: 2, name: "Gas Station", icon: "/gas.png", keyword: "gas_station" },
-  { id: 3, name: "Grocery", icon: "/grocery.png", keyword: "supermarket" },
-  { id: 4, name: "Bed and Breakfast", icon: "/bnb.png", keyword: "lodging" },
-  { id: 5, name: "Night Club", icon: "/beer.png", keyword: "club" },
-  { id: 6, name: "Hotel", icon: "/hotel.png", keyword: "hotel" },
-  { id: 7, name: "Bank", icon: "/bank.png", keyword: "bank" },
+  { id: 1, name: "Restaurant", icon: "/icons/restaurant2.png", keyword: "restaurant" },
+  { id: 2, name: "Gas Station", icon: "/icons/gas-station.png", keyword: "gas_station" },
+  { id: 3, name: "Grocery", icon: "/icons/grocery2.png", keyword: "supermarket" },
+  { id: 4, name: "Bed and Breakfast", icon: "/icons/bed.png", keyword: "lodging" },
+  { id: 5, name: "Night Club", icon: "/icons/cheers.png", keyword: "club" },
+  { id: 6, name: "Hotel", icon: "/icons/hotel2.png", keyword: "hotel" },
+  { id: 7, name: "Bank", icon: "/icons/bank2.png", keyword: "bank" },
 //   { id: 8, name: "Cafe", icon: "/cafe.png", keyword: "cafe" }, // NEW
 ];

@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) => void }) => {
   return (
-    <div className="flex flex-col gap-4 md:flex-col md:items-center md:justify-start md:bg-slate-200 p-3 w-full">
+    <div className="card2 flex flex-col gap-4 md:flex-col md:items-center md:justify-center md:rounded-2xl md:bg-gray-900 p-3 w-full">
 
       {category.map((item) => (
         <div
@@ -13,8 +13,8 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
           onClick={() => onSelectCategory(item.keyword)}
           className="group flex items-center  gap-3 md:gap-0 md:justify-center md:relative cursor-pointer hover:scale-105 transition-all"
         >
-          <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow">
-            <Image src={item.icon} alt={item.name} width={24} height={24} />
+          <div className="w-10 h-10 flex items-center justify-center bg-gray-900 rounded-full hover:border-1 border-rose-500 transition-all">
+            <Image src={item.icon} alt={item.name} width={20} height={20} />
           </div>
 
           {/* Always show label on mobile (flex-col), only show tooltip on desktop */}
@@ -23,7 +23,7 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
           </span>
 
           {/* Tooltip for desktop */}
-          <span className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-120">
+          <span className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-1520">
             {item.name}
           </span>
         </div>
