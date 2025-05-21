@@ -45,20 +45,12 @@
 
 .input{
   outline: none;
- 
- 
-  /* background: #e2e8f0;
-  -webkit-box-shadow: 12px 12px 24px #c0c5cc, -12px -12px 24px #ffffff;
-  box-shadow: 12px 12px 24px #c0c5cc, -12px -12px 24px #ffffff; */
+  transition: all 0.5s ease-in-out;
 }
 
-.input:hover{
-  border: 1px solid rgb(231, 137, 169);
-}
-
+.input:hover,
 .input:focus{
-  border: 1px solid rgb(165, 0, 54);
-
+  border: 1px solid rgb(231, 137, 169);
 }
 
 .nav-btn{

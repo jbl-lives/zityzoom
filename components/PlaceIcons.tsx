@@ -14,7 +14,7 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
           className="group flex items-center  gap-3 md:gap-0 md:justify-center md:relative cursor-pointer hover:scale-105 transition-all"
         >
           <div className="w-10 h-10 flex items-center justify-center bg-gray-900 rounded-full hover:border-1 border-rose-500 transition-all">
-            <Image src={item.icon} alt={item.name} width={20} height={20} />
+            <Image src={item.icon} alt={item.name} width={21} height={21} />
           </div>
 
           {/* Always show label on mobile (flex-col), only show tooltip on desktop */}
@@ -23,7 +23,8 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
           </span>
 
           {/* Tooltip for desktop */}
-          <span className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-1520">
+          <span className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded
+           bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-5000">
             {item.name}
           </span>
         </div>
