@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import PlaceIcons from "@/components/PlaceIcons";
 import MapPanel from "@/components/MapPanel";
 import Script from 'next/script';
+import CityInfoPanel from "@/components/CityInfoPanel"; // <--- Import CityInfoPanel
+import { motion, AnimatePresence } from "framer-motion"; 
 
 export default function Home() {
   const [placeList, setPlaceList] = useState([]);
@@ -16,37 +18,73 @@ export default function Home() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentSessionToken, setCurrentSessionToken] = useState<string | undefined>(undefined);
 
-  // New states for location preference
+   // States for location preference
   const [isUsingUserLocation, setIsUsingUserLocation] = useState(true); // Default to using user's detected location
   const userDetectedLocationRef = useRef<{ lat: number; lng: number } | null>(null); // To store the actual detected location
   const defaultFallbackLocation = { lat: -26.2041, lng: 28.0473 }; // Johannesburg fallback
 
+   // State for CityInfoPanel
+  const [isCityInfoPanelOpen, setIsCityInfoPanelOpen] = useState(false);
+  const [cityForInfo, setCityForInfo] = useState<string | null>(null);
+  const [userCountry, setUserCountry] = useState<string | null>(null);
+
+  console.log("DEBUG: app/page.tsx - userCountry state on render:", userCountry);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const detectedLoc = {
+    const getUserLocationAndCountry = async () => {
+      let detectedLoc: { lat: number; lng: number } | null = null;
+      let errorOccurred = false;
+
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          detectedLoc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
-          userDetectedLocationRef.current = detectedLoc; // Store detected location
-          setCurrentLocation(detectedLoc); // Set as current if initial preference is user location
-        },
-        (err) => {
+          userDetectedLocationRef.current = detectedLoc;
+          setCurrentLocation(detectedLoc);
+        } catch (err) {
           console.warn("Could not get location, using default.", err);
-          // If geolocation fails, we immediately fall back to default
-          userDetectedLocationRef.current = null; // Clear detected location
+          detectedLoc = defaultFallbackLocation; // Fallback immediately on error
+          userDetectedLocationRef.current = null;
           setCurrentLocation(defaultFallbackLocation);
-          setIsUsingUserLocation(false); // Switch to default location mode
+          setIsUsingUserLocation(false);
           setSearchError("Could not retrieve your location. Using a default location.");
+          errorOccurred = true;
         }
-      );
-    } else {
-      setSearchError("Geolocation is not supported by your browser. Using a default location.");
-      setCurrentLocation(defaultFallbackLocation);
-      setIsUsingUserLocation(false); // Switch to default location mode
-    }
+      } else {
+        setSearchError("Geolocation is not supported by your browser. Using a default location.");
+        detectedLoc = defaultFallbackLocation;
+        setCurrentLocation(defaultFallbackLocation);
+        setIsUsingUserLocation(false);
+        errorOccurred = true;
+      }
+
+      // Now, reverse geocode to get the country if a location was determined
+      // if (detectedLoc) {
+      //   try {
+      //     const response = await fetch(`/api/reverse-geocode?lat=${detectedLoc.lat}&lng=${detectedLoc.lng}`);
+      //     const data = await response.json();
+      //     if (response.ok && data.country) {
+      //       setUserCountry(data.country);
+      //       console.log("Detected user country:", data.country);
+      //     } else {
+      //       console.error("Failed to fetch user country:", data.error);
+      //       // Optionally, set an error or fallback for the country lookup
+      //     }
+      //   } catch (err) {
+      //     console.error("Error fetching user country:", err);
+      //   }
+      // }
+       if (detectedLoc) {
+        await fetchCountryForLocation(detectedLoc); // Call the helper function
+      }
+    };
+
+    getUserLocationAndCountry();
   }, []);
 
   // Effect to re-fetch when currentLocation changes
@@ -54,27 +92,49 @@ export default function Home() {
     if (currentLocation) {
       console.log("Current active search location:", currentLocation);
       // Trigger an initial search based on the current location
-      // You might want to debounce this or only run once on initial load
       searchPlacesByQuery("Restaurants", undefined, currentLocation.lat, currentLocation.lng);
     }
   }, [currentLocation]); // Re-run when currentLocation changes
 
   // Function to toggle location preference
-  const handleToggleLocationPreference = () => {
+   const handleToggleLocationPreference = async () => { // Make async to await country lookup
     setIsUsingUserLocation(prev => {
       const newState = !prev;
       if (newState && userDetectedLocationRef.current) {
-        // Switching to user location, if detected
         setCurrentLocation(userDetectedLocationRef.current);
-        setSearchError(null); // Clear error if switching to user location
+        setSearchError(null);
+        // Re-fetch country if switching back to user location
+        if (userDetectedLocationRef.current) {
+          fetchCountryForLocation(userDetectedLocationRef.current);
+        }
       } else {
-        // Switching to default location or if user location not detected
         setCurrentLocation(defaultFallbackLocation);
         setSearchError("Using default location. Toggle to use your current location if detected.");
+        // Set country to default location's country
+        fetchCountryForLocation(defaultFallbackLocation);
       }
       return newState;
     });
   };
+
+  // Helper function to fetch country for a given location
+    const fetchCountryForLocation = async (location: { lat: number; lng: number }) => {
+      try {
+        const response = await fetch(`/api/reverse-geocode?lat=${location.lat}&lng=${location.lng}`);
+        const data = await response.json();
+        if (response.ok && data.country) {
+          setUserCountry(data.country);
+          console.log("Updated user country to:", data.country);
+        } else {
+          console.error("Failed to update user country:", data.error);
+          setUserCountry(null); // Clear country if lookup fails
+        }
+      } catch (err) {
+        console.error("Error updating user country:", err);
+        setUserCountry(null);
+      }
+    };
+
 
   // Renamed and adjusted this for clarity and correct Text Search usage
   const searchPlacesByQuery = async (query: string, sessionTokenFromSearch?: string, searchLat?: number, searchLng?: number) => {
@@ -150,71 +210,140 @@ export default function Home() {
     setCurrentSessionToken(undefined);
   };
 
-  return (
+   // New handler for city click
+    const handleCityClick = (cityName: string) => {
+    setCityForInfo(cityName);
+    // DO NOT set setIsCityInfoPanelOpen(true) here directly.
+    // It will be handled by the new useEffect below.
+    console.log("DEBUG: City clicked. Waiting for userCountry to be resolved.");
+  };
+
+  // NEW useEffect: To open CityInfoPanel only when cityForInfo is set AND userCountry is resolved (string or null)
+  useEffect(() => {
+    if (cityForInfo && userCountry !== null && !isCityInfoPanelOpen) {
+      // This means a city was clicked (cityForInfo is set) AND userCountry
+      // has been resolved (it's either a string or explicitly null from failure).
+      // And the panel is not already open.
+      setIsCityInfoPanelOpen(true);
+      console.log("DEBUG: Opening CityInfoPanel now that country is resolved:", userCountry);
+    }
+    // Also, if cityForInfo becomes null (panel closed), ensure isCityInfoPanelOpen is false
+    if (!cityForInfo && isCityInfoPanelOpen) {
+      setIsCityInfoPanelOpen(false);
+    }
+  }, [cityForInfo, userCountry, isCityInfoPanelOpen]); // Dependencies: react to changes in these states
+
+
+  const handleCloseCityInfo = () => {
+    setIsCityInfoPanelOpen(false);
+    setCityForInfo(null);
+  };
+
+   // Define Framer Motion variants for the animation
+  const panelVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 }, // Slightly scaled down and moved on entry/exit
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.3, ease: "easeIn" } },
+  };
+
+   return (
     <>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyA6rT8Jea8UIGbupwx2jQfFBt4plm8iDhM&libraries=places`}
-        strategy="beforeInteractive"
-      />
+      
       <div className="h-screen w-full">
         <Header
           userInput={searchPlacesByQuery}
           currentLocation={currentLocation}
           onCategorySelect={fetchPlacesByCategory}
-          onToggleLocationPreference={handleToggleLocationPreference} // <--- Pass the new handler
-          isUsingUserLocation={isUsingUserLocation} // <--- Pass the new state
+          onToggleLocationPreference={handleToggleLocationPreference}
+          isUsingUserLocation={isUsingUserLocation}
+          onCityClick={handleCityClick}
         />
-        <div className="p-6 pt-0">
-          <div className="flex w-full md:justify-center md:gap-2 md:bg-rose-200 bg-[url('/images/bg-pic5.jpg')]
-            rounded-4xl md:p-0 flex-wrap-reverse md:pr-0 pr-1 p-0 md:h-[89vh] h-[80vh]">
-            <div className="md:w-[5%] md:py-4 md:px-1 md:h-full w-full h-[6%] md:flex hidden relative z-20">
-              <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
-            </div>
-            <div className="flex md:justify-center md:flex-nowrap flex-wrap-reverse md:w-[93%] w-full
-              md:h-full h-[97%] bg-none md:p-4 p-2 gap-4">
-              <div className="card md:w-[45%] md:rounded-3xl w-full overflow-hidden md:h-full h-[60%] relative z-10 py-2 md:bg-none bg-white">
-                <h2 className="text-[20px] w-[80%] font-bold text-gray-700 mb-2 pt-4 px-4 sticky top-0 z-10">
-                  Search Results
-                </h2>
-                <div className="relative z-10 overflow-y-scroll h-[calc(100%-60px)] px-1 scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-rose-500 rounded-lg">
-                  {searchError && !isLoading && (
-                    <p className="text-red-500 text-center p-4">{searchError}</p>
-                  )}
+         <div className="p-6 pt-0 flex justify-center items-center"> {/* This flex container now centers its *single* child */}
+          {/* Main content area - This is the div where the magic happens */}
+          <div className="flex w-full md:max-w-7xl md:justify-center items-center md:gap-4 md:bg-rose-200 bg-[url('/images/bg-pic5.jpg')]
+            rounded-4xl md:p-0 flex-wrap-reverse md:pr-0 pr-1 p-0 md:h-[89vh] h-[80vh] relative overflow-hidden">
+            {/* Added md:max-w-7xl to limit width on large screens and facilitate centering */}
 
-                  <PlaceList
-                    placeList={placeList}
-                    onSelectPlace={handlePlaceSelection}
-                    isLoading={isLoading}
-                    sessionToken={currentSessionToken}
+            {/* AnimatePresence allows components to animate when they are removed from the DOM */}
+            <AnimatePresence mode="wait">
+              {isCityInfoPanelOpen && cityForInfo ? (
+                // Render CityInfoPanel when open
+                <motion.div
+                  key="cityInfoPanel"
+                  variants={panelVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="absolute inset-0 flex items-center justify-center p-4 rounded-4xl z-30" // Overlay styles
+                >
+                  <CityInfoPanel
+                    cityName={cityForInfo}
+                    userCountry={userCountry}
+                    onClose={handleCloseCityInfo}
                   />
-                </div>
-              </div>
-
-              <div className="md:w-[55%] w-full md:h-full h-[40%]">
-                {(selectedPlace?.geometry?.location || currentLocation) ? (
-                  <MapPanel
-                    userLocation={
-                      selectedPlace?.geometry?.location
-                        ? {
-                            lat: typeof selectedPlace.geometry.location.lat === 'function'
-                              ? selectedPlace.geometry.location.lat()
-                              : selectedPlace.geometry.location.lat,
-                            lng: typeof selectedPlace.geometry.location.lng === 'function'
-                              ? selectedPlace.geometry.location.lng()
-                              : selectedPlace.geometry.location.lng,
-                          }
-                        : currentLocation
-                    }
-                    placeList={placeList}
-                    selectedPlaceId={selectedPlace?.place_id}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-500">
-                    <span className="loader"></span>
+                </motion.div>
+              ) : (
+                // Render main content when CityInfoPanel is closed
+                <motion.div
+                  key="mainContent"
+                  variants={panelVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="flex w-full h-full justify-center items-center" // Ensure this div takes up full space AND centers its children
+                >
+                  {/* Category Icons (only visible on md screens and up) */}
+                  <div className="md:w-[5%] md:py-4 md:px-1 md:h-full w-full h-[6%] md:flex hidden relative z-20">
+                    <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
                   </div>
-                )}
-              </div>
-            </div>
+
+                  {/* PlaceList and MapPanel Wrapper */}
+                  <div className="flex md:flex-nowrap flex-wrap-reverse md:w-[93%] w-full md:h-full h-[97%]
+                    bg-none md:p-4 p-2 gap-4 justify-center items-center"> {/* Added justify-center and items-center here */}
+                    <div className="card md:w-[45%] md:rounded-3xl w-full overflow-hidden md:h-full h-[60%] relative z-10 py-2 md:bg-none bg-white">
+                      <h2 className="text-[20px] w-[80%] font-bold text-gray-700 mb-2 pt-4 px-4 sticky top-0 z-10">
+                        Search Results
+                      </h2>
+                      <div className="relative z-10 overflow-y-scroll h-[calc(100%-60px)] px-1 scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-rose-500 rounded-lg">
+                        {searchError && !isLoading && (
+                          <p className="text-red-500 text-center p-4">{searchError}</p>
+                        )}
+                        <PlaceList
+                          placeList={placeList}
+                          onSelectPlace={handlePlaceSelection}
+                          isLoading={isLoading}
+                          sessionToken={currentSessionToken}
+                        />
+                      </div>
+                    </div>
+                    <div className="md:w-[55%] w-full md:h-full h-[40%]">
+                      {(selectedPlace?.geometry?.location || currentLocation) ? (
+                        <MapPanel
+                          userLocation={
+                            selectedPlace?.geometry?.location
+                              ? {
+                                  lat: typeof selectedPlace.geometry.location.lat === 'function'
+                                    ? selectedPlace.geometry.location.lat()
+                                    : selectedPlace.geometry.location.lat,
+                                  lng: typeof selectedPlace.geometry.location.lng === 'function'
+                                    ? selectedPlace.geometry.location.lng()
+                                    : selectedPlace.geometry.location.lng,
+                                }
+                              : currentLocation
+                          }
+                          placeList={placeList}
+                          selectedPlaceId={selectedPlace?.place_id}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          <span className="loader"></span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

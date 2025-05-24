@@ -13,7 +13,7 @@ const PlaceIcons = ({ onSelectCategory }: { onSelectCategory: (value: string) =>
           onClick={() => onSelectCategory(item.keyword)}
           className="group flex items-center  gap-3 md:gap-0 md:justify-center md:relative cursor-pointer hover:scale-105 transition-all"
         >
-          <div className="w-10 h-10 flex items-center justify-center bg-gray-900 rounded-full hover:border-1 border-rose-500 transition-all">
+          <div className="w-10 h-10 flex items-center justify-center rounded-full hover:border-1 border-rose-500 transition-all">
             <Image src={item.icon} alt={item.name} width={21} height={21} />
           </div>
 

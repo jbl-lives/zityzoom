@@ -23,6 +23,7 @@ interface HeaderProps {
   onCategorySelect: (category: string) => void;
   onToggleLocationPreference: () => void; // <--- NEW PROP for toggling location
   isUsingUserLocation: boolean; // <--- NEW PROP to indicate current preference
+  onCityClick: (cityName: string) => void; // <--- NEW PROP
 }
 
 
@@ -32,7 +33,8 @@ function Header({
   currentLocation,
   onCategorySelect,
   onToggleLocationPreference, // Destructure new prop
-  isUsingUserLocation // Destructure new prop
+  isUsingUserLocation, // Destructure new prop
+  onCityClick, // Destructure new prop
 }: HeaderProps) {
   const [searchInput, setSearchInput] = useState(""); // This state might be redundant here if SearchBar handles its own input.
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
@@ -44,7 +46,7 @@ function Header({
   };
 
   return (
-    <div className="flex justify-between p-3 px-5 flex-wrap">
+    <div className="relative flex justify-between p-3 px-5 flex-wrap">
       <div className="flex gap-3 items-center ">
         <Image src="/zip-logo.png" alt="logo" width={30} height={30} />
         <h2
@@ -61,34 +63,77 @@ function Header({
         <SearchBar onSearch={userInput} lat={currentLocation?.lat || 0} lng={currentLocation?.lng || 0} />
       </div>
 
-      <Weather currentLocation={currentLocation} />
+      <Weather currentLocation={currentLocation} onCityClick={onCityClick} />
 
       {/** Nav Button and Location Toggle */}
-      <div className="flex items-center gap-2"> {/* New container for buttons */}
+      <div className="flex items-center gap-4 "> {/* New container for buttons */}
         {/* Location Toggle Button */}
-        <button
+          <button
           onClick={onToggleLocationPreference}
-          className={`flex items-center cursor-pointer justify-center p-1 rounded-full transition-colors duration-200 ${
-            isUsingUserLocation
-              ? 'bg-green-300 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
+          className={`relative cursor-pointer flex items-center justify-center w-14 h-14 rounded-full transition-colors duration-200 overflow-hidden bg-transparent`}
           title={isUsingUserLocation ? "Using Your Current Location" : "Using Default Location"}
         >
-          {isUsingUserLocation ? (
-            // Icon for "using current location" (e.g., location filled)
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+          <div className="absolute inset-0 flex items-center justify-center">
+            {/* Skewed Circle (Golf Hole-like) SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 100 100"
+              className={`absolute w-full h-full transition-colors duration-200`}
+              style={{
+                transform: 'rotateX(65deg) scale(0.5) translateY(80%)',
+                transformOrigin: 'center center',
+                filter: isUsingUserLocation
+                  ? 'drop-shadow(0 4px 6px rgba(34, 197, 94, 0.4))'
+                  : 'drop-shadow(0 2px 4px rgba(107, 114, 128, 0.2))'
+              }}
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                className={isUsingUserLocation ? 'fill-green-500' : 'fill-gray-400'}
+              />
+            </svg>
+
+            {/* Pin Icon SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className={`absolute w-5 h-7 z-10 transition-colors duration-200 ${
+                  isUsingUserLocation ? 'text-green-700' : 'text-gray-700'
+              }`}
+              style={{
+                transform: 'translateY(-10%)',
+                filter: isUsingUserLocation
+                  ? 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))'
+                  : 'drop-shadow(0 1px 1px rgba(0,0,0,0.2))'
+              }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
             </svg>
 
-          ) : (
-            // Icon for "using default location" (e.g., location outline)
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            {/* Small "Hole" SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 100 100"
+              className={`absolute w-1 h-2 z-20`}
+              style={{
+                  transform: 'rotateX(65deg) scale(0.1) translateY(15%)',
+                  transformOrigin: 'center center',
+              }}
+            >
+              <circle
+                cx="30"
+                cy="30"
+                r="3"
+                className={isUsingUserLocation ? 'fill-red-900' : 'fill-gray-600'}
+              />
             </svg>
-          )}
+          </div>
         </button>
 
         <Drawer>

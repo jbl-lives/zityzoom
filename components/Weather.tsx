@@ -2,19 +2,73 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion"; // Import motion for animations
+
+// Import specific Lucide icons you'll need
+import {
+  Sun,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  CloudFog,
+  Moon,
+  CloudSun,
+  CloudMoon,
+  Zap, // For thunderstorm
+  Droplets, // For drizzle
+  ThermometerSun, // For extreme hot
+  //ThermometerSnow, // For extreme cold
+  Wind, // For windy conditions
+  AlertCircle // Fallback for unknown
+} from 'lucide-react';
 
 interface WeatherProps {
   currentLocation: { lat: number; lng: number } | null;
+  onCityClick: (cityName: string) => void;
 }
 
-const Weather: React.FC<WeatherProps> = ({ currentLocation }) => {
+// Map OpenWeatherMap icon codes to Lucide React components
+const getWeatherIconComponent = (iconCode: string) => {
+  // Defensive check: If iconCode is not a string or is empty, return a fallback immediately
+  if (typeof iconCode !== 'string' || iconCode.length < 2) {
+      console.warn("Invalid iconCode received:", iconCode);
+      return AlertCircle;
+  }
+
+  const isDay = iconCode.endsWith('d');
+  const baseCode = iconCode.slice(0, 2); // e.g., "01", "02", "10"
+
+  switch (baseCode) {
+    case '01': // Clear sky
+      return isDay ? Sun : Moon;
+    case '02': // Few clouds
+      return isDay ? CloudSun : CloudMoon;
+    case '03': // Scattered clouds
+    case '04': // Broken clouds / Overcast clouds
+      return Cloud;
+    case '09': // Shower rain (drizzle)
+      return Droplets; // Using Droplets for drizzle/light rain
+    case '10': // Rain
+      return CloudRain;
+    case '11': // Thunderstorm
+      return Zap; // Using Zap for lightning/thunder
+    case '13': // Snow
+      return CloudSnow;
+    case '50': // Mist / Fog / Haze
+      return CloudFog;
+    default:
+      return AlertCircle; // Fallback icon for unknown types
+  }
+};
+
+const Weather: React.FC<WeatherProps> = ({ currentLocation, onCityClick }) => {
   const [weather, setWeather] = useState<{
     temp: number;
     city: string;
-    icon: string;
-    description: string; // Added description for alt text
+    iconCode: string; // Store original icon code to map to Lucide
+    description: string;
   } | null>(null);
-  const [error, setError] = useState<string | null>(null); // State for potential errors
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -22,18 +76,18 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation }) => {
     const fetchWeather = async () => {
       if (!currentLocation) {
         setError("Location not available for weather.");
-        setWeather(null);
+        setWeather(null); // Ensure weather is null if location isn't available
         return;
       }
 
       setError(null); // Clear previous errors
       const { lat, lng } = currentLocation;
-      // Ensure your API key is correctly loaded from environment variables
-      const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY; 
+      const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 
       if (!apiKey) {
         console.error("NEXT_PUBLIC_WEATHER_API_KEY is not set.");
         setError("Weather API key missing.");
+        setWeather(null); // Ensure weather is null if API key is missing
         return;
       }
 
@@ -45,73 +99,89 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation }) => {
           const errorData = await res.json();
           console.error("Weather API error response:", errorData);
           setError(`Failed to fetch weather: ${errorData.message || res.statusText}`);
-          setWeather(null); // Clear old weather data on error
+          setWeather(null); // Ensure weather is null on API error
           return;
         }
 
         const data = await res.json();
-        if (data.main && data.name && data.weather?.[0]) {
+        // **CRITICAL FIX:** Ensure all expected properties exist before setting state
+        if (data.main && data.name && data.weather?.[0] && data.weather[0].icon && data.weather[0].description) {
           setWeather({
             temp: Math.round(data.main.temp),
             city: data.name,
-            icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`, // Use @2x for higher resolution
-            description: data.weather[0].description, // Capture description for alt text
+            iconCode: data.weather[0].icon, // Store the icon code
+            description: data.weather[0].description,
           });
         } else {
-          setError("Invalid weather data received.");
-          setWeather(null);
+          // If API call was successful but data is incomplete
+          console.error("Incomplete weather data received:", data);
+          setError("Incomplete weather data received. Please try again.");
+          setWeather(null); // Ensure weather is null for incomplete data
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Weather fetch error:", err);
         setError("An unexpected error occurred while fetching weather.");
-        setWeather(null);
+        setWeather(null); // Ensure weather is null on network/parsing errors
       }
     };
 
-    // Initial fetch
     fetchWeather();
-
-    // Set up interval for periodic updates (e.g., every 10 minutes = 600000 ms)
-    // Adjust the interval based on how frequently you want weather updates
+    // Clear any existing interval before setting a new one, important for re-renders
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
     intervalId = setInterval(fetchWeather, 600000); // 10 minutes
 
-    // Cleanup function to clear the interval when the component unmounts
-    // or when currentLocation changes (to reset the timer for the new location)
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [currentLocation]); // Re-run effect if currentLocation changes
+  }, [currentLocation]); // Dependency array should only have currentLocation
+
+  // --- Render Logic ---
 
   if (error) {
     return <div className="text-red-500 text-sm p-1">{error}</div>;
   }
 
-  if (!weather) {
+  // **CRITICAL FIX:** Check if weather exists AND if iconCode exists before proceeding
+  if (!weather || !weather.iconCode) {
     return (
       <div className="flex items-center gap-2 text-sm text-gray-700">
         <span className="animate-pulse">Loading weather...</span>
       </div>
-    ); // Or a simple loader/placeholder
+    );
   }
+
+  // Now, `weather` and `weather.iconCode` are guaranteed to be defined
+  const LucideIcon = getWeatherIconComponent(weather.iconCode);
 
   return (
     <div className="flex items-center gap-2 text-sm text-gray-700 ">
-      {/* Removed background, padding, and rounded-full from the image tag */}
-      {/* Added a containing div for potential styling if needed without affecting the icon directly */}
-      
       <div className="flex-shrink-0">
-        <img
-          src={weather.icon}
-          alt={weather.description || "Weather Icon"} // Use description for better alt text
-          className="w-10 h-10" // Slightly larger size for better visibility
-        />
+        <motion.div
+          key={weather.iconCode} // Key changes when icon changes, triggering animation
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={`
+            w-6 h-6 flex items-center justify-center rounded-full
+            ${weather.iconCode.endsWith('d') ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600'}
+          `} // Dynamic background/text color based on day/night
+        >
+          <LucideIcon className="w-4 h-4" /> {/* Render the Lucide icon */}
+        </motion.div>
       </div>
       <span className="font-medium text-gray-400" >{weather.temp}°C</span>
       <span className="font-medium text-gray-400">{weather.description}</span>
       <span> | </span>
-      <span className="font-medium">{weather.city}</span>
+      <span
+        className="font-medium cursor-pointer hover:underline"
+        onClick={() => onCityClick(weather.city)}
+      >
+        {weather.city}
+      </span>
     </div>
   );
 };
