@@ -17,6 +17,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentSessionToken, setCurrentSessionToken] = useState<string | undefined>(undefined);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null); // State to hold the currently selected category keyword
 
    // States for location preference
   const [isUsingUserLocation, setIsUsingUserLocation] = useState(true); // Default to using user's detected location
@@ -195,14 +196,16 @@ export default function Home() {
     }
   };
 
-  const fetchPlacesByCategory = async (category: string) => {
-    // Ensure we use the currently active search location
+  const fetchPlacesByCategory = async (categoryKeyword: string) => { // Renamed parameter for clarity
+    // Set the active category state
+    setActiveCategory(categoryKeyword); // This is where the selection "sticks"
+    // ... (rest of your fetchPlacesByCategory logic) ...
     if (!currentLocation) {
-      console.warn("Current location not available, cannot fetch categories.");
-      setSearchError("Location not available to fetch categories. Please allow location access.");
-      return;
+        console.warn("Current location not available, cannot fetch categories.");
+        setSearchError("Location not available to fetch categories. Please allow location access.");
+        return;
     }
-    await searchPlacesByQuery(category, undefined, currentLocation.lat, currentLocation.lng);
+    await searchPlacesByQuery(categoryKeyword, undefined, currentLocation.lat, currentLocation.lng);
   };
 
   const handlePlaceSelection = (place: any) => {
@@ -238,6 +241,17 @@ export default function Home() {
     setIsCityInfoPanelOpen(false);
     setCityForInfo(null);
   };
+
+    // Function to unselect category if the same one is clicked again
+  const handleCategorySelect = (keyword: string) => {
+    if (activeCategory === keyword) {
+      setActiveCategory(null); // Unselect if the same category is clicked
+      searchPlacesByQuery("", undefined, currentLocation?.lat, currentLocation?.lng); // Optionally clear search
+    } else {
+      fetchPlacesByCategory(keyword); // Select and search
+    }
+  };
+  
 
    // Define Framer Motion variants for the animation
   const panelVariants = {
@@ -294,7 +308,10 @@ export default function Home() {
                 >
                   {/* Category Icons (only visible on md screens and up) */}
                   <div className="md:w-[5%] md:py-4 md:px-1 md:h-full w-full h-[6%] md:flex hidden relative z-20">
-                    <PlaceIcons onSelectCategory={fetchPlacesByCategory} />
+                    <PlaceIcons
+                      onSelectCategory={handleCategorySelect} // Use the new handler
+                      selectedCategory={activeCategory} // Pass the active category state
+                    />
                   </div>
 
                   {/* PlaceList and MapPanel Wrapper */}
@@ -313,10 +330,13 @@ export default function Home() {
                           onSelectPlace={handlePlaceSelection}
                           isLoading={isLoading}
                           sessionToken={currentSessionToken}
+                          onLoadMore={() => {}} // Provide a no-op or actual load more handler
+                          hasNextPage={false}   // Set to true if there are more pages to load
+                          isMoreLoading={false} // Set to true if loading more results
                         />
                       </div>
                     </div>
-                    <div className="md:w-[55%] w-full md:h-full h-[40%]">
+                    <div className="md:w-[55%] w-full md:h-full h-[40%] ">
                       {(selectedPlace?.geometry?.location || currentLocation) ? (
                         <MapPanel
                           userLocation={

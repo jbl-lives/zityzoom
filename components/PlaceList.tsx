@@ -1,17 +1,27 @@
+// components/PlaceList.tsx
 import React from 'react';
 import PlaceItemCard from './PlaceItemCard';
 import Skeleton from './Skeleton';
 
-// Add isLoading to Props type
 // It's good practice to define an interface for props when using TypeScript
 interface PlaceListProps {
-  placeList: any[]; // Consider a more specific type if possible
+  placeList: any[]; // Consider a more specific type if possible (e.g., google.maps.places.PlaceResult[])
   onSelectPlace: (place: any) => void;
-  isLoading: boolean; // New prop
+  isLoading: boolean; // For initial loading of the list
   sessionToken?: string;
+  onLoadMore: () => void; // New prop: function to call to load more results
+  hasNextPage: boolean; // New prop: boolean indicating if more pages are available
+  isMoreLoading: boolean; // New prop: loading state specifically for "Load More"
 }
 
-function PlaceList({ placeList, onSelectPlace, isLoading }: PlaceListProps) {
+function PlaceList({ 
+  placeList, 
+  onSelectPlace, 
+  isLoading, 
+  onLoadMore, 
+  hasNextPage, 
+  isMoreLoading // Destructure new prop
+}: PlaceListProps) {
   const fetchPlaceDetails = (place: any) => {
     // Only attempt if google.maps is loaded
     if (!window.google || !window.google.maps || !window.google.maps.places) {
@@ -20,10 +30,11 @@ function PlaceList({ placeList, onSelectPlace, isLoading }: PlaceListProps) {
       return;
     }
 
-    const map = new google.maps.Map(document.createElement("div")); // Required dummy map
+    // Creating a dummy map for PlacesService is a common pattern for server-side or non-map-bound calls
+    // However, if you already have a map instance in a parent component, you might pass that instead.
+    const map = new google.maps.Map(document.createElement("div")); // Required dummy map for PlacesService
     const service = new google.maps.places.PlacesService(map);
 
-   
     service.getDetails({ placeId: place.place_id }, (details, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && details) {
         onSelectPlace(details); // Send detailed place back
@@ -39,7 +50,7 @@ function PlaceList({ placeList, onSelectPlace, isLoading }: PlaceListProps) {
 
       {/* Conditional Rendering based on loading state */}
       {isLoading ? (
-        // Show skeletons when loading
+        // Show skeletons when initial loading
         <div className="w-full gap-4 shrink-0">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => ( // Show 8 skeletons, matching your map limit
             <Skeleton key={item} />
@@ -49,13 +60,24 @@ function PlaceList({ placeList, onSelectPlace, isLoading }: PlaceListProps) {
         // Show actual place list when not loading and there are results
         <div className="w-full gap-4 shrink-0">
           {placeList.map((place: any, index: number) => (
-            // Limit to 8 items as per your original code
-            index <= 7 && (
-              <div key={place.place_id || index} onClick={() => fetchPlaceDetails(place)}>
-                <PlaceItemCard place={place} />
-              </div>
-            )
+            // Display all items loaded from the API
+            <div key={place.place_id || index} onClick={() => fetchPlaceDetails(place)}>
+              <PlaceItemCard place={place} />
+            </div>
           ))}
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div className="w-full text-center mt-4 mb-8">
+              <button
+                onClick={onLoadMore}
+                disabled={isMoreLoading} // Disable button when loading more
+                className={`px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200 ${isMoreLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {isMoreLoading ? 'Loading More...' : 'Load More Results'}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         // Show "no results" message when not loading and placeList is empty

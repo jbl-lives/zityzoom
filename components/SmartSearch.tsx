@@ -47,7 +47,7 @@ export default function SmartSearch({ lat, lng }: { lat: number; lng: number }) 
     <div className="w-full max-w-md mx-auto">
       <input
         className="border p-2 rounded w-full"
-        placeholder="Search for places..."
+        placeholder="Search for cafes, parks, services, or anything!"
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />
