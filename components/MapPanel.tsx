@@ -97,7 +97,11 @@ export default function MapPanel({ userLocation, placeList, selectedPlaceId }: P
 
       // Initialize directionsService and directionsRenderer ONLY ONCE per map load
       const directionsService = new google.maps.DirectionsService();
-      directionsRenderer.current = new google.maps.DirectionsRenderer();
+      directionsRenderer.current = new google.maps.DirectionsRenderer({
+        polylineOptions: {
+          strokeColor: '#0eac04' // green color for the direction line
+        }
+      });
 
       const map = new google.maps.Map(mapRef.current!, {
         center: userLocation,

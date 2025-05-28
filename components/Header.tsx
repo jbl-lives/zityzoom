@@ -1,10 +1,10 @@
+// zittyzoom/components/Header.tsx
 "use client";
 import Image from 'next/image';
 import { useState } from "react";
 import Weather from "@/components/Weather";
 import SearchBar from "@/components/Searchbar";
 import { Button } from "@/components/ui/button";
-
 
 import {
   Drawer,
@@ -19,27 +19,28 @@ import {
 
 interface HeaderProps {
   userInput: (query: string, sessionToken?: string, lat?: number, lng?: number) => void;
-  currentLocation: { lat: number; lng: number } | null;
+  currentLocation: { lat: number; lng: number } | null; // **NOTE:** We'll still need to align this type with page.tsx as discussed previously.
   onCategorySelect: (category: string) => void;
-  onToggleLocationPreference: () => void; // <--- NEW PROP for toggling location
-  isUsingUserLocation: boolean; // <--- NEW PROP to indicate current preference
-  onCityClick: (cityName: string) => void; // <--- NEW PROP
+  onToggleLocationPreference: () => void;
+  isUsingUserLocation: boolean;
+  onCityClick: (cityName: string) => void;
+  // NEW: Add onSearchInitiated prop
+  onSearchInitiated: () => void; // This will be called by SearchBar when a search starts
 }
-
-
 
 function Header({
   userInput,
   currentLocation,
   onCategorySelect,
-  onToggleLocationPreference, // Destructure new prop
-  isUsingUserLocation, // Destructure new prop
-  onCityClick, // Destructure new prop
+  onToggleLocationPreference,
+  isUsingUserLocation,
+  onCityClick,
+  onSearchInitiated, // Destructure the new prop
 }: HeaderProps) {
-  const [searchInput, setSearchInput] = useState(""); // This state might be redundant here if SearchBar handles its own input.
+  const [searchInput, setSearchInput] = useState(""); // This state is indeed redundant, you can remove it if you wish.
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
-  const handleCategorySelect = (category: string) => {
+  const handleCategorySelect = (category: string) => { // This function is not currently used in Header itself, but is a prop.
     console.log("Selected category from Sheet:", category);
     onCategorySelect(category);
     setIsCategorySheetOpen(false);
@@ -60,21 +61,25 @@ function Header({
       {/**Search input */}
       <div className="hidden md:flex gap-2 items-center justify-center">
         {/* Pass currentLocation's lat/lng to SearchBar */}
-        <SearchBar onSearch={userInput} lat={currentLocation?.lat || 0} lng={currentLocation?.lng || 0} />
+        <SearchBar
+          onSearch={userInput}
+          lat={currentLocation?.lat || 0}
+          lng={currentLocation?.lng || 0}
+          // NEW: Pass the handler here
+          onSearchInitiated={onSearchInitiated}
+        />
       </div>
 
       <Weather currentLocation={currentLocation} onCityClick={onCityClick} />
 
       {/** Nav Button and Location Toggle */}
-      <div className="flex items-center gap-4 "> {/* New container for buttons */}
-        {/* Location Toggle Button */}
-          <button
+      <div className="flex items-center gap-4 ">
+        <button
           onClick={onToggleLocationPreference}
           className={`relative cursor-pointer flex items-center justify-center w-14 h-14 rounded-full transition-colors duration-200 overflow-hidden bg-transparent`}
           title={isUsingUserLocation ? "Using Your Current Location" : "Using Default Location"}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            {/* Skewed Circle (Golf Hole-like) SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 100 100"
@@ -95,7 +100,6 @@ function Header({
               />
             </svg>
 
-            {/* Pin Icon SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -116,7 +120,6 @@ function Header({
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
             </svg>
 
-            {/* Small "Hole" SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 100 100"
@@ -166,11 +169,17 @@ function Header({
 
       {/**Mobile Search*/}
       <div className="w-full md:hidden flex justify-center items-center gap-2">
-        {/* Pass currentLocation's lat/lng to SearchBar */}
-        <SearchBar onSearch={userInput} isMobile lat={currentLocation?.lat || 0} lng={currentLocation?.lng || 0} />
+        <SearchBar
+          onSearch={userInput}
+          isMobile
+          lat={currentLocation?.lat || 0}
+          lng={currentLocation?.lng || 0}
+          // NEW: Pass the handler here for mobile too
+          onSearchInitiated={onSearchInitiated}
+        />
       </div>
     </div>
   );
 }
 
-export default Header
+export default Header;

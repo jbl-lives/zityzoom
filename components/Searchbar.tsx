@@ -1,42 +1,42 @@
+// zittyzoom/components/Searchbar.tsx
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
 type Props = {
-  onSearch: (query: string, sessionToken?: string, lat?: number, lng?: number) => void; // <--- ADDED lat, lng
+  onSearch: (query: string, sessionToken?: string, lat?: number, lng?: number) => void;
   lat: number;
   lng: number;
   isMobile?: boolean;
+  onSearchInitiated?: () => void; // NEW: Optional prop for signaling search start
 };
 
-const SearchBar = ({ onSearch, lat, lng, isMobile = false }: Props) => {
+const SearchBar = ({ onSearch, lat, lng, isMobile = false, onSearchInitiated }: Props) => {
   const [searchInput, setSearchInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const sessionTokenRef = useRef<string | null>(null); // To store the session
+  const sessionTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!searchInput.trim()) {
       setSuggestions([]);
-      sessionTokenRef.current = null; // Reset session if search input is cleared
+      sessionTokenRef.current = null;
       return;
     }
 
-    // Start a new session if one doesn't exist for this typing interaction
     if (!sessionTokenRef.current) {
       sessionTokenRef.current = uuidv4();
     }
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-   debounceRef.current = setTimeout(async () => {
+    debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
           `/api/google-place-api?keyword=${encodeURIComponent(
             searchInput
-          )}&lat=${lat}&lng=${lng}&type=autocomplete&sessiontoken=${sessionTokenRef.current}` // sessiontoken HERE
+          )}&lat=${lat}&lng=${lng}&type=autocomplete&sessiontoken=${sessionTokenRef.current}`
         );
 
         const data = await res.json();
@@ -51,19 +51,28 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false }: Props) => {
   }, [searchInput, lat, lng]);
 
   const handleSearch = (query: string) => {
-    // Pass the current session token AND lat/lng to the parent's onSearch
-    onSearch(query, sessionTokenRef.current || undefined, lat, lng); // <--- PASS lat, lng
+    // NEW: Call the onSearchInitiated prop if it exists
+    if (onSearchInitiated) {
+      onSearchInitiated();
+    }
+
+    onSearch(query, sessionTokenRef.current || undefined, lat, lng);
     setSearchInput(query);
     setShowSuggestions(false);
     sessionTokenRef.current = null;
   }
 
-   const handleClearSearch = () => {
-    setSearchInput(""); // Clear the input
-    setSuggestions([]); // Clear any existing suggestions
-    setShowSuggestions(false); // Hide suggestions
-    sessionTokenRef.current = null; // Ensure session is reset
-   // onSearch(""); // Optionally, trigger an empty search to clear results on the parent
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    sessionTokenRef.current = null;
+    // Optionally: if clearing should also clear parent's search results and unselect category
+    // You might want to call onSearchInitiated here too:
+    if (onSearchInitiated) {
+        onSearchInitiated();
+    }
+    onSearch(""); // This would clear results in page.tsx
   };
 
   return (
@@ -72,11 +81,8 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false }: Props) => {
         type="text"
         value={searchInput}
         onFocus={() => setShowSuggestions(true)}
-        // onBlur: added a check to not hide if clear button was clicked quickly
         onBlur={() => setTimeout(() => {
-          // Only hide suggestions if the focus hasn't returned to the input area
-          // This timeout is important to allow the onMouseDown event on the suggestion list to fire first
-          if (document.activeElement?.className !== 'input-clear-button') { // Add a class to your clear button
+          if (document.activeElement?.className !== 'input-clear-button') {
             setShowSuggestions(false);
           }
         }, 100)}
@@ -85,21 +91,20 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false }: Props) => {
         placeholder="Search Anything"
         className={`input bg-white p-3 rounded-full px-5 w-full border ${
           isMobile ? "shadow-sm" : "border-gray-200"
-        } outline-rose-400 focus:border-rose-400 pr-10`} 
+        } outline-rose-400 focus:border-rose-400 pr-10`}
       />
 
-      {/* Clear button */}
-      {searchInput.length > 0 && ( // Display only if there's text
+      {searchInput.length > 0 && (
         <button
-          type="button" // Important for not submitting forms
+          type="button"
           onClick={handleClearSearch}
-          className="input-clear-button absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer p-1 rounded-full z-30" // Increased z-index
+          className="input-clear-button absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer p-1 rounded-full z-30"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={2} // Thicker 'X'
+            strokeWidth={2}
             stroke="currentColor"
             className="w-4 h-4"
           >
