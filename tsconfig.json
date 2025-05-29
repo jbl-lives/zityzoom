@@ -14,6 +14,7 @@
     "jsx": "preserve",
     "incremental": true,
     "types": ["google.maps"],
+     "baseUrl": ".",
     "plugins": [
       {
         "name": "next"

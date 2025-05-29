@@ -1,156 +1,119 @@
-// app/hooks/use-location.ts
+// zittyzoom/app/hooks/use-location.ts
 import { useState, useEffect, useRef, useCallback } from "react";
 
+// Define the type for location data that includes city and country
 export interface LocationData {
+  lat: number;
+  lng: number;
   city: string | null;
   country: string | null;
-  lat: number | null;
-  lng: number | null;
 }
 
-interface UseLocationResult {
-  currentLocation: LocationData | null;
-  isUsingUserLocation: boolean;
-  searchError: string | null;
-  handleToggleLocationPreference: () => void;
-  isLoadingLocation: boolean;
-}
+// Default fallback location
+const defaultFallbackLocation: LocationData = { lat: -26.2041, lng: 28.0473, city: "Johannesburg", country: "South Africa" };
 
-export const useLocation = (): UseLocationResult => {
+export const useLocation = () => {
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
-  const [isUsingUserLocation, setIsUsingUserLocation] = useState(true);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true); // New state for location loading
+  const [isUsingUserLocation, setIsUsingUserLocation] = useState(true); // Default to using user's detected location
+  const [searchError, setSearchError] = useState<string | null>(null); // For location-specific errors
+  const [userCountry, setUserCountry] = useState<string | null>(null); // For weather component
+  const userDetectedLocationRef = useRef<LocationData | null>(null); // To store the initially detected user location
 
-  const userDetectedLocationRef = useRef<LocationData | null>(null);
-  // Default fallback location for Johannesburg
-  const defaultFallbackLocation: LocationData = { city: "Johannesburg", country: "South Africa", lat: -26.2041, lng: 28.0473 };
-
-  // Helper function to fetch country and city for a given location
-  const fetchCountryAndCityForLocation = useCallback(async (location: { lat: number; lng: number }) => {
+  // Helper function to fetch city/country for a given location
+  const fetchCityAndCountryForLocation = useCallback(async (
+    location: { lat: number; lng: number }
+  ): Promise<{ city: string | null; country: string | null }> => {
     try {
       const response = await fetch(`/api/reverse-geocode?lat=${location.lat}&lng=${location.lng}`);
       const data = await response.json();
-      if (response.ok && data.country && data.city) {
-        return {
-          lat: location.lat,
-          lng: location.lng,
-          country: data.country,
-          city: data.city,
-        };
+      if (response.ok && data.city && data.country) {
+        return { city: data.city, country: data.country };
       } else {
-        console.error("Failed to update location with country/city:", data.error);
-        return {
-          lat: location.lat,
-          lng: location.lng,
-          country: null,
-          city: null,
-        };
+        console.warn("Failed to reverse geocode location:", data.error);
+        return { city: null, country: null };
       }
     } catch (err) {
-      console.error("Error updating location with country/city:", err);
-      return {
-        lat: location.lat,
-        lng: location.lng,
-        country: null,
-        city: null,
-      };
+      console.error("Error reverse geocoding location:", err);
+      return { city: null, country: null };
     }
-  }, []); // No dependencies, as it's a pure geocoding function
+  }, []);
 
-  // Effect to get user's initial location and country
+  // Effect to get user's initial location
   useEffect(() => {
     const getUserLocationAndCountry = async () => {
-      setIsLoadingLocation(true);
-      let detectedLoc: LocationData | null = null;
+      let tempDetectedLoc: LocationData | null = null;
 
       if (navigator.geolocation) {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
               enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0
+              timeout: 10000, // 10 seconds
+              maximumAge: 0 // no cached position
             });
           });
-          detectedLoc = {
+          const basicLoc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-            city: null, // Will be filled by reverse geocoding
-            country: null, // Will be filled by reverse geocoding
           };
-          userDetectedLocationRef.current = { ...detectedLoc }; // Store the initially detected lat/lng
-          setIsUsingUserLocation(true);
-          setSearchError(null);
+
+          const { city, country } = await fetchCityAndCountryForLocation(basicLoc);
+          tempDetectedLoc = { ...basicLoc, city, country };
+
+          userDetectedLocationRef.current = tempDetectedLoc; // Store the detected location
+          setCurrentLocation(tempDetectedLoc); // Set current active location
+          setUserCountry(country); // Update standalone userCountry state
+          setSearchError(null); // Clear any previous errors
+
         } catch (err) {
-          console.warn("Could not get user location, falling back to default.", err);
-          detectedLoc = { ...defaultFallbackLocation };
-          userDetectedLocationRef.current = null;
-          setIsUsingUserLocation(false);
+          console.warn("Could not get location, using default.", err);
+          tempDetectedLoc = defaultFallbackLocation;
+          userDetectedLocationRef.current = null; // Clear user detected if error
+          setCurrentLocation(defaultFallbackLocation);
+          setIsUsingUserLocation(false); // Switch to default mode
           setSearchError("Could not retrieve your location. Using a default location.");
+          setUserCountry(defaultFallbackLocation.country); // Set country from fallback
         }
       } else {
         setSearchError("Geolocation is not supported by your browser. Using a default location.");
-        detectedLoc = { ...defaultFallbackLocation };
-        setIsUsingUserLocation(false);
-      }
-
-      // Now, reverse geocode to get the country and city for the determined location
-      if (detectedLoc && detectedLoc.lat !== null && detectedLoc.lng !== null) {
-        const fullLocationData = await fetchCountryAndCityForLocation({ lat: detectedLoc.lat, lng: detectedLoc.lng });
-        setCurrentLocation(fullLocationData);
-        // If user location was successfully detected, update the ref with full data
-        if (userDetectedLocationRef.current && detectedLoc.lat === userDetectedLocationRef.current.lat && detectedLoc.lng === userDetectedLocationRef.current.lng) {
-          userDetectedLocationRef.current = fullLocationData;
-        }
-      } else {
-        // Fallback to default if no valid lat/lng even from detectedLoc
+        tempDetectedLoc = defaultFallbackLocation;
         setCurrentLocation(defaultFallbackLocation);
+        setIsUsingUserLocation(false);
+        setUserCountry(defaultFallbackLocation.country);
       }
-      setIsLoadingLocation(false);
     };
 
-    if (currentLocation === null) { // Ensures it runs only once on initial mount
-      getUserLocationAndCountry();
-    }
-  }, [fetchCountryAndCityForLocation, currentLocation]); // Dependency on currentLocation ensures it runs only once on mount
-
+    getUserLocationAndCountry();
+  }, [fetchCityAndCountryForLocation]); // Dependency on fetchCityAndCountryForLocation for useCallback
 
   // Function to toggle location preference
-  const handleToggleLocationPreference = useCallback(async () => {
+  const handleToggleLocationPreference = useCallback(() => {
     setIsUsingUserLocation(prev => {
       const newState = !prev;
-      setIsLoadingLocation(true); // Start loading state for location toggle
-      if (newState && userDetectedLocationRef.current && userDetectedLocationRef.current.lat !== null && userDetectedLocationRef.current.lng !== null) {
-        // If switching to user location and detected location is available
-        fetchCountryAndCityForLocation({ lat: userDetectedLocationRef.current.lat, lng: userDetectedLocationRef.current.lng })
-          .then(fullLocationData => {
-            setCurrentLocation(fullLocationData);
-            setSearchError(null);
-          })
-          .catch(error => {
-            console.error("Error toggling to user location:", error);
-            setSearchError("Failed to switch to your current location.");
-            setCurrentLocation(defaultFallbackLocation); // Fallback on error
-            setIsUsingUserLocation(false); // Revert toggle if failed
-          })
-          .finally(() => setIsLoadingLocation(false));
+      if (newState && userDetectedLocationRef.current) {
+        setCurrentLocation(userDetectedLocationRef.current);
+        setSearchError(null);
+        setUserCountry(userDetectedLocationRef.current.country);
       } else {
-        // If switching to default location or user location not detected
         setCurrentLocation(defaultFallbackLocation);
         setSearchError("Using default location. Toggle to use your current location if detected.");
-        setIsLoadingLocation(false);
+        setUserCountry(defaultFallbackLocation.country);
       }
       return newState;
     });
-  }, [fetchCountryAndCityForLocation, defaultFallbackLocation]);
-
+  }, []);
 
   return {
     currentLocation,
+    userDetectedLocationRef,
     isUsingUserLocation,
-    searchError,
+    setIsUsingUserLocation,
+    searchError, // Location-specific error
+    setSearchError,
+    fetchCityAndCountryForLocation,
     handleToggleLocationPreference,
-    isLoadingLocation,
+    userCountry,
+    setUserCountry,
+    defaultFallbackLocation, // Expose default for external use if needed
   };
 };

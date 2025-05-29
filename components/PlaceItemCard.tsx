@@ -1,75 +1,61 @@
 import React from 'react';
 import Image from 'next/image';
+import { UserRound} from 'lucide-react';
 
 const BASE_URL_PHOTO = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400";
 
 interface PlaceItemCardProps {
     place: {
-      name: string;
-      vicinity?: string;
-      formatted_address?: string;
-      rating?: number;
-      user_ratings_total?: number;
-      photos?: {
-        photo_reference: string;
-      }[];
-      place_id: string;
+        name: string;
+        vicinity?: string;
+        formatted_address?: string;
+        rating?: number;
+        user_ratings_total?: number;
+        photos?: {
+            photo_reference: string;
+        }[];
+        place_id: string;
     };
-  }
-  
+}
 
 function PlaceItemCard({ place }: PlaceItemCardProps) {
-    return (
-        <div className='place-card shrink-0 mt-3 flex w-full h-[130px] items-center gap-3 
-            p-2 z-1  shadow-xl/20 bg-white cursor-pointer 
-            hover:translate-x-2 transition-all duration-75 overflow-hidden'>
+    const photoUrl = place?.photos?.[0]?.photo_reference
+        ? `${BASE_URL_PHOTO}&photo_reference=${place.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACE_KEY}`
+        : "/placeholder.jpg";
 
-            <div className="md:w-[10rem]  md:h-[90%] w-[7rem] h-[90%] flex-shrink-0  overflow-hidden">
+    return (
+        <div
+            className="flex items-center gap-4 p-4 bg-white rounded-lg shadow hover:bg-gray-100 cursor-pointer"
+            key={place.place_id}
+        >
+            {/* Image */}
+            <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
                 <Image
-                    src={
-                    place?.photos && place.photos[0]?.photo_reference
-                        ? `${BASE_URL_PHOTO}&photo_reference=${place.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACE_KEY}`
-                        : "/placeholder.jpg"
-                    }
+                    src={photoUrl}
                     alt="place image"
                     width={100}
                     height={100}
-                    className=" w-full h-full flex-shrink-0 object-cover "
-                    key={place?.photos?.[0]?.photo_reference || place?.place_id}
+                    className="w-full h-full object-cover"
                 />
             </div>
-            
-            <div className='p-2 w-[70%] '>
-                <h2 className='line-clamp-2 font-semibold pb-2 truncate border-b-1 border-gray-100'>{place?.name}</h2>
-                <div className='flex gap-2 mt-1.5 items-start'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
-                        className="w-5 h-5 flex-shrink-0 text-rose-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                    </svg>
 
-                    <h2 className='text-[0.84rem] text-gray-600 line-clamp-2'>{place.vicinity || place.formatted_address || "Address unavailable"}</h2>
+            {/* Text Info */}
+            <div className="flex-1 overflow-hidden">
+                <h3 className="text-lg font-semibold truncate">{place.name}</h3>
+                <p className="text-sm text-gray-600 truncate mt-1">
+                    {place.vicinity || place.formatted_address || "Address unavailable"}
+                </p>
+                {place.rating && (
+                    <div className='flex mt-1 w-full gap-4'>
+                        <p className="text-sm text-yellow-600 mt-1">
+                        ⭐ {place.rating} 
+                        </p>
+                         <p className='flex items-center text-sm gap-2 mt-1 text-gray-500 '>
+                            <UserRound className=' w-4 fill-gray-500' />
+                        ({place.user_ratings_total ?? 0} reviews)</p>
+                    </div>
                     
-
-
-                </div>
-
-                <div className='flex gap-2 mt-2'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
-                    className="w-5 h-5 flex-shrink-0 text-yellow-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                    </svg>
-                    <h2 className=' text-[0.85rem] text-gray-400 line-clamp-2 tracking-wider flex'>
-                    {place?.rating ? place.rating : "No rating"}
-
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
-                        className="w-5 h-5 flex-shrink-0 ml-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                        <span>{place?.user_ratings_total ? place?.user_ratings_total : "0"}</span>
-                    </h2>
-                </div>
+                )}
             </div>
         </div>
     );
