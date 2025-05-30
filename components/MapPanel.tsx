@@ -139,7 +139,7 @@ export default function MapPanel({ mapCenter, userCurrentGeolocation, placeList,
         const isSelected = place.place_id === selectedPlaceId;
         const markerContent = createCustomSvgMarkerContent(
           path,
-          isSelected ? "#005ce6" : "#d41d01",
+          isSelected ? "#ec003f" : "#101828",
           "#FFFFFF"
         );
 
@@ -167,10 +167,20 @@ export default function MapPanel({ mapCenter, userCurrentGeolocation, placeList,
                     directionsRenderer.current?.setDirections(result);
 
                     const eta = result.routes[0].legs[0].duration?.text ?? "Unknown";
+                    const phone = details.formatted_phone_number ?? "Phone number not available";
+                    const openingHours = details.opening_hours?.weekday_text
+                        ? details.opening_hours.weekday_text.map(day => `<div>${day}</div>`).join("")
+                        : "<div>Operating hours not available</div>";
+
                     infoWindowRef.current!.setContent(`
-                      <div style="max-width: 200px;">
+                      <div style="max-width: 200px; background: #fff; padding: 10px; border-radius: 8px;">
                         <strong style="color: #f43f5e; font-weight:bold; font-size:16px">${details.name}</strong><br/>
+                        <span style="color: #585858;">${phone}</span><br/>
                         <span style="color:#585858">${details.formatted_address ?? 'No address available'}</span><br/>
+                         <div style="margin-top: 4px;">
+                            <strong>Operating Hours:</strong><br/>
+                            ${openingHours}
+                        </div>
                         <strong style="color: #0eac04">ETA: ${eta}</strong>
                       </div>
                     `);
