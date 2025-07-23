@@ -8,10 +8,11 @@ type Props = {
   lat: number;
   lng: number;
   isMobile?: boolean;
+  isTablet?: boolean;
   onSearchInitiated?: () => void; // NEW: Optional prop for signaling search start
 };
 
-const SearchBar = ({ onSearch, lat, lng, isMobile = false, onSearchInitiated }: Props) => {
+const SearchBar = ({ onSearch, lat, lng, isMobile = false, isTablet = false, onSearchInitiated }: Props) => {
   const [searchInput, setSearchInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -76,7 +77,7 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false, onSearchInitiated }: 
   };
 
   return (
-    <div className={`relative ${isMobile ? "w-full mt-3" : "w-[600px]"}`}>
+    <div className={`relative ${isMobile ? "w-full mt-3" : "w-[600px]" } ${isTablet ? "w-[400px]" : ""}`}>
       <input
         type="text"
         value={searchInput}

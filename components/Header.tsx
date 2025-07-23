@@ -48,6 +48,7 @@ function Header({
 
   return (
     <div className="relative flex justify-between p-3 px-5 flex-wrap">
+      {/** Logo and Title */}
       <div className="flex gap-3 items-center ">
         <Image src="/zip-logo.png" alt="logo" width={30} height={30} />
         <h2

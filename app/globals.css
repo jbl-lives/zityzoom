@@ -236,7 +236,7 @@
 /* globals.css */
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 3px;
   height: 8px;
 }
 

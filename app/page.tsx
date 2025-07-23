@@ -61,17 +61,24 @@ export default function Home() {
   };
 
   const handleCityClick = (cityName: string) => {
+    console.log("handleCityClick: cityName =", cityName, "userCountry =", userCountry);
     setCityForInfo(cityName);
   };
 
+  // useEffect(() => {
+  //   console.log("useEffect: cityForInfo =", cityForInfo, "userCountry =", userCountry, "isCityInfoPanelOpen =", isCityInfoPanelOpen);
+  //   if (cityForInfo && userCountry !== null && !isCityInfoPanelOpen) {
+  //     setIsCityInfoPanelOpen(true);
+  //   }
+  //   if (!cityForInfo && isCityInfoPanelOpen) {
+  //     setIsCityInfoPanelOpen(false);
+  //   }
+  // }, [cityForInfo, userCountry, isCityInfoPanelOpen]);
+
   useEffect(() => {
-    if (cityForInfo && userCountry !== null && !isCityInfoPanelOpen) {
-      setIsCityInfoPanelOpen(true);
-    }
-    if (!cityForInfo && isCityInfoPanelOpen) {
-      setIsCityInfoPanelOpen(false);
-    }
-  }, [cityForInfo, userCountry, isCityInfoPanelOpen]);
+  console.log("useEffect: cityForInfo =", cityForInfo, "userCountry =", userCountry);
+  setIsCityInfoPanelOpen(!!cityForInfo); // Remove userCountry check
+}, [cityForInfo, userCountry]);
 
   const handleCloseCityInfo = () => {
     setIsCityInfoPanelOpen(false);
@@ -95,9 +102,10 @@ export default function Home() {
         onCityClick={handleCityClick}
         onSearchInitiated={handleSearchInitiated}
       />
-      <div className="p-6 pt-0 flex justify-center items-center">
-        <div className="flex w-full md:max-w-7xl md:justify-center items-center md:gap-4 md:bg-rose-200 bg-[url('/images/bg-pic5.jpg')]
-          rounded-4xl md:p-0 flex-wrap-reverse md:pr-0 pr-1 p-0 md:h-[89vh] h-[80vh] relative overflow-hidden">
+      <div className=" px-6 py-0  flex justify-center items-center ">
+        <div className="flex w-full bg-[url('/images/bg-pic5.jpg')] bg-rose-200
+        
+          rounded-4xl  flex-wrap-reverse md:pr-0 pr-1 p-0  h-[85vh] relative overflow-hidden lg:">
           <AnimatePresence mode="wait">
             {isCityInfoPanelOpen && cityForInfo ? (
               <motion.div
@@ -121,7 +129,7 @@ export default function Home() {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="flex w-full h-full justify-center items-center"
+                className="flex w-full h-full justify-center items-center  "
               >
                 <div className="md:w-[5%] md:py-4 md:px-1 md:h-full w-full h-[6%] md:flex hidden relative z-20">
                   <PlaceIcons

@@ -26,62 +26,64 @@ export const useLocation = () => {
     try {
       const response = await fetch(`/api/reverse-geocode?lat=${location.lat}&lng=${location.lng}`);
       const data = await response.json();
+      console.log("fetchCityAndCountryForLocation: API response =", data);
+
       if (response.ok && data.city && data.country) {
         return { city: data.city, country: data.country };
       } else {
-        console.warn("Failed to reverse geocode location:", data.error);
-        return { city: null, country: null };
+        console.warn("Failed to reverse geocode location:", data.error || "No city/country in response");
+        return { city: null, country: "South Africa" }; // Fallback country
       }
     } catch (err) {
       console.error("Error reverse geocoding location:", err);
-      return { city: null, country: null };
+      return { city: null, country: "South Africa" }; // Fallback country
     }
   }, []);
 
   // Effect to get user's initial location
   useEffect(() => {
     const getUserLocationAndCountry = async () => {
-      let tempDetectedLoc: LocationData | null = null;
+    let tempDetectedLoc: LocationData | null = null;
 
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000, // 10 seconds
-              maximumAge: 0 // no cached position
-            });
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
           });
-          const basicLoc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
+        });
+        const basicLoc = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
 
-          const { city, country } = await fetchCityAndCountryForLocation(basicLoc);
-          tempDetectedLoc = { ...basicLoc, city, country };
+        const { city, country } = await fetchCityAndCountryForLocation(basicLoc);
+        tempDetectedLoc = { ...basicLoc, city, country: country || "South Africa" };
+        console.log("getUserLocationAndCountry: Setting tempDetectedLoc =", tempDetectedLoc);
 
-          userDetectedLocationRef.current = tempDetectedLoc; // Store the detected location
-          setCurrentLocation(tempDetectedLoc); // Set current active location
-          setUserCountry(country); // Update standalone userCountry state
-          setSearchError(null); // Clear any previous errors
-
-        } catch (err) {
-          console.warn("Could not get location, using default.", err);
-          tempDetectedLoc = defaultFallbackLocation;
-          userDetectedLocationRef.current = null; // Clear user detected if error
-          setCurrentLocation(defaultFallbackLocation);
-          setIsUsingUserLocation(false); // Switch to default mode
-          setSearchError("Could not retrieve your location. Using a default location.");
-          setUserCountry(defaultFallbackLocation.country); // Set country from fallback
-        }
-      } else {
-        setSearchError("Geolocation is not supported by your browser. Using a default location.");
+        userDetectedLocationRef.current = tempDetectedLoc;
+        setCurrentLocation(tempDetectedLoc);
+        setUserCountry(country || "South Africa"); // Ensure userCountry is set
+        setSearchError(null);
+      } catch (err) {
+        console.warn("Could not get location, using default.", err);
         tempDetectedLoc = defaultFallbackLocation;
+        userDetectedLocationRef.current = null;
         setCurrentLocation(defaultFallbackLocation);
         setIsUsingUserLocation(false);
+        setSearchError("Could not retrieve your location. Using a default location.");
         setUserCountry(defaultFallbackLocation.country);
       }
-    };
+    } else {
+      setSearchError("Geolocation is not supported by your browser. Using a default location.");
+      tempDetectedLoc = defaultFallbackLocation;
+      setCurrentLocation(defaultFallbackLocation);
+      setIsUsingUserLocation(false);
+      setUserCountry(defaultFallbackLocation.country);
+    }
+  };
 
     getUserLocationAndCountry();
   }, [fetchCityAndCountryForLocation]); // Dependency on fetchCityAndCountryForLocation for useCallback

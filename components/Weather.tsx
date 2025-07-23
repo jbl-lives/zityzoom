@@ -146,7 +146,7 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation, onCityClick }) => {
   }
 
   // **CRITICAL FIX:** Check if weather exists AND if iconCode exists before proceeding
-  if (!weather || !weather.iconCode) {
+  if (!weather || !weather.iconCode || !weather.city) {
     return (
       <div className="flex items-center gap-2 text-sm text-gray-700">
         <span className="animate-pulse">Loading weather...</span>
@@ -178,7 +178,10 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation, onCityClick }) => {
       <span> | </span>
       <span
         className="font-medium cursor-pointer hover:underline"
-        onClick={() => onCityClick(weather.city)}
+        onClick={() => {
+          console.log("Weather city clicked:", weather.city);
+          onCityClick(weather.city);
+        }}
       >
         {weather.city}
       </span>
