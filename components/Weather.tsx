@@ -158,7 +158,7 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation, onCityClick }) => {
   const LucideIcon = getWeatherIconComponent(weather.iconCode);
 
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-700 ">
+    <div className="flex items-center gap-2 md:text-sm text-lg text-gray-700 ">
       <div className="flex-shrink-0">
         <motion.div
           key={weather.iconCode} // Key changes when icon changes, triggering animation
@@ -166,11 +166,11 @@ const Weather: React.FC<WeatherProps> = ({ currentLocation, onCityClick }) => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           className={`
-            w-6 h-6 flex items-center justify-center rounded-full
+            md:w-6 md:h-6  w-10 h-10 flex items-center justify-center rounded-full
             ${weather.iconCode.endsWith('d') ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600'}
           `} // Dynamic background/text color based on day/night
         >
-          <LucideIcon className="w-4 h-4" /> {/* Render the Lucide icon */}
+          <LucideIcon className="m:w-4 md:h-4 w-6 h-6" /> {/* Render the Lucide icon */}
         </motion.div>
       </div>
       <span className="font-medium text-gray-400" >{weather.temp}°C</span>

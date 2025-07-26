@@ -168,11 +168,27 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
-    padding: 0 20px !important;
-    background-color: rgb(233, 231, 232,);
-    
+    background-color: rgb(255, 255, 255); /* Added missing semicolon here */
+
+    /* Default padding for larger screens (desktop) */
+    padding: 0 20px !important; 
+  }
+
+  /* Media query for mobile screens */
+  @media (max-width: 768px) { /* Tailwind's 'md' breakpoint is 768px, a common mobile cutoff */
+    body {
+      padding: 0 5px !important; /* Apply 7px padding on sides for mobile */
+    }
+  }
+
+  /* You might also consider a breakpoint for larger desktops, e.g., xl */
+  @media (min-width: 1280px) { /* Tailwind's 'xl' breakpoint is 1280px */
+    body {
+      padding: 0 40px !important; /* Example: more padding on very large screens */
+    }
   }
 }
 
@@ -180,7 +196,7 @@
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 12px;
+    border-radius: 25px;
     border: 2px solid white
 }
 

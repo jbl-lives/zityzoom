@@ -29,7 +29,8 @@ function PlaceItemCard({ place }: PlaceItemCardProps) {
             key={place.place_id}
         >
             {/* Image */}
-            <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+            <div className="md:w-24 md:h-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100
+                            w-20 h-20">
                 <Image
                     src={photoUrl}
                     alt="place image"

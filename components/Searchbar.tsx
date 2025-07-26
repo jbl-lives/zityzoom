@@ -1,4 +1,4 @@
-// zittyzoom/components/Searchbar.tsx
+// SearchBar.tsx
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from 'uuid';
@@ -7,12 +7,12 @@ type Props = {
   onSearch: (query: string, sessionToken?: string, lat?: number, lng?: number) => void;
   lat: number;
   lng: number;
-  isMobile?: boolean;
-  isTablet?: boolean;
-  onSearchInitiated?: () => void; // NEW: Optional prop for signaling search start
+  isMobileDialog?: boolean; // New prop: true if rendered inside the mobile dialog
+  onSearchInitiated?: () => void;
+  className?: string; // Still not used, consider removing if not needed
 };
 
-const SearchBar = ({ onSearch, lat, lng, isMobile = false, isTablet = false, onSearchInitiated }: Props) => {
+const SearchBar = ({ onSearch, lat, lng, isMobileDialog = false, onSearchInitiated }: Props) => {
   const [searchInput, setSearchInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -52,7 +52,6 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false, isTablet = false, onS
   }, [searchInput, lat, lng]);
 
   const handleSearch = (query: string) => {
-    // NEW: Call the onSearchInitiated prop if it exists
     if (onSearchInitiated) {
       onSearchInitiated();
     }
@@ -68,16 +67,17 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false, isTablet = false, onS
     setSuggestions([]);
     setShowSuggestions(false);
     sessionTokenRef.current = null;
-    // Optionally: if clearing should also clear parent's search results and unselect category
-    // You might want to call onSearchInitiated here too:
     if (onSearchInitiated) {
-        onSearchInitiated();
+      onSearchInitiated();
     }
-    onSearch(""); // This would clear results in page.tsx
+    onSearch("");
   };
 
   return (
-    <div className={`relative ${isMobile ? "w-full mt-3" : "w-[600px]" } ${isTablet ? "w-[400px]" : ""}`}>
+    // Width logic:
+    // If inside mobile dialog, it's w-full.
+    // Otherwise, apply responsive widths for tablet (md) and desktop (lg).
+    <div className={`relative ${isMobileDialog ? "w-full mt-3" : "w-full md:w-[350px] lg:w-[600px]"}`}>
       <input
         type="text"
         value={searchInput}
@@ -90,8 +90,9 @@ const SearchBar = ({ onSearch, lat, lng, isMobile = false, isTablet = false, onS
         onChange={(e) => setSearchInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch(searchInput)}
         placeholder="Search Anything"
+        // Adjust input styling based on context if needed
         className={`input bg-white p-3 rounded-full px-5 w-full border ${
-          isMobile ? "shadow-sm" : "border-gray-200"
+          isMobileDialog ? "shadow-sm" : "border-gray-200"
         } outline-rose-400 focus:border-rose-400 pr-10`}
       />
 

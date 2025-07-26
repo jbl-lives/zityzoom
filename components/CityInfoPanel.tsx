@@ -165,7 +165,7 @@ const CityInfoPanel: React.FC<CityInfoPanelProps> = ({ cityName, userCountry, on
   }, [cityName, userCountry]);
 
   return (
-    <div className="relative w-full h-full bg-white rounded-3xl p-6 shadow-xl flex flex-col items-center overflow-auto scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-rose-500">
+    <div className="relative w-full h-full bg-white rounded-3xl md:p-6 py-4 px-2 shadow-xl flex flex-col items-center overflow-auto scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-rose-500">
       {/* City Header and Image */}
       <div className="flex w-full p-6 gap-8 mb-4 flex-col md:flex-row">
         <div className="md:w-1/3 h-60 border border-gray-300 rounded-2xl shadow-lg overflow-hidden flex-shrink-0">
@@ -267,7 +267,7 @@ const CityInfoPanel: React.FC<CityInfoPanelProps> = ({ cityName, userCountry, on
       {/* Close Button */}
       <button
         onClick={onClose}
-        className="absolute right-4 top-4 p-2 text-gray-600 hover:text-red-700 transition-colors duration-200"
+        className="absolute md:right-4 md:top-4 right-2 top-2 p-2 text-gray-600 hover:text-red-700 transition-colors duration-200"
       >
         <X size={24} />
       </button>
