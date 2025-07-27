@@ -116,7 +116,7 @@ export default function Home() {
         onSearchInitiated={handleSearchInitiated}
       />
       <div className={`xl:px-6 xl:py-0 flex justify-center items-center ${isMobile ? 'px-2 py-0' : ''}`}>
-        <div className="flex w-full bg-[url('/images/bg-pic5.jpg')] bg-rose-200 bg-cover bg-center xl:rounded-4xl xl:h-[85vh] relative md:rounded-4xl md:h-[90vh] h-[93vh] rounded-3xl overflow-hidden shadow-lg">
+        <div className="flex w-full bg-[url('/images/bg-pic5.jpg')] bg-rose-200 bg-cover bg-center xl:rounded-4xl xl:h-[87vh] relative md:rounded-4xl md:h-[90vh] h-[93vh] rounded-3xl overflow-hidden shadow-lg">
           <AnimatePresence mode="wait">
             {isCityInfoPanelOpen && cityForInfo ? (
               <motion.div
@@ -125,7 +125,7 @@ export default function Home() {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="absolute inset-0 flex items-center justify-center md:p-4 p-1 rounded-4xl z-30"
+                className="absolute inset-0 flex items-center justify-center p-4 rounded-4xl z-30"
               >
                 <CityInfoPanel
                   cityName={cityForInfo}
@@ -145,7 +145,7 @@ export default function Home() {
                 <div className={`flex flex-col md:flex-col xl:flex-row w-full h-full gap-4 ${isMobile ? 'p-2' : 'md:p-4 p-1'} items-stretch`}>
                   {/* MapPanel: Collapsible on mobile (350px-560px) */}
                   <motion.div
-                    className="card w-full xl:w-[55%] xl:order-2 order-1 xl:h-full md:rounded-3xl rounded-xs overflow-hidden"
+                    className="card w-full xl:w-[55%] xl:order-2 order-1 xl:h-full md:rounded-3xl rounded-xs overflow-hidden "
                     variants={mobilePanelVariants}
                     animate={isMobile ? (isMapExpanded ? 'expanded' : 'collapsed') : 'expanded'}
                   >
@@ -206,7 +206,7 @@ export default function Home() {
 
                   {/* PlaceList: Collapsible on mobile (350px-560px) */}
                   <motion.div
-                    className="card w-full xl:w-[45%] xl:order-1 order-2 xl:h-full md:rounded-3xl rounded-xs overflow-hidden bg-white md:p-4 p-1"
+                    className="card w-full xl:w-[45%] xl:order-1 order-2 xl:h-full md:rounded-3xl rounded-xs overflow-hidden bg-white md:p-4 p-1 xl:pb-4 md:pb-2"
                     variants={mobilePanelVariants}
                     animate={isMobile ? (isMapExpanded ? 'collapsed' : 'expanded') : 'expanded'}
                   >
