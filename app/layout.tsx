@@ -21,13 +21,13 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "ZittyZoom",
-  description: "ZittyZoom - Your Ultimate Travel Companion",
-  keywords: ["travel", "companion", "ZittyZoom"],
+  title: "ZityZoom",
+  description: "ZityZoom - Your Ultimate Travel Companion",
+  keywords: ["travel", "companion", "ZityZoom"],
   authors: [
     {
-      name: "ZittyZoom",
-      url: "https://zittyzoom.com",
+      name: "Javency22",
+      url: "https://jnm.com",
     },
   ],
   creator: "Javency22",

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { SearchResult } from '@/hooks/use-places-search'
 import { useLocation } from '@/hooks/use-location'
 import { usePlacesSearch } from '@/hooks/use-places-search'
+import categories from '@/data/category' // Import categories
 
 export default function Home() {
   const {
@@ -45,8 +46,8 @@ export default function Home() {
 
   useEffect(() => {
     if (currentLocation && !currentSearchQuery && !activeCategory) {
-      searchPlacesByQuery('Restaurants', undefined, currentLocation.lat, currentLocation.lng)
-      setActiveCategory('Restaurants')
+      searchPlacesByQuery('restaurant', undefined, currentLocation.lat, currentLocation.lng) // Use keyword
+      setActiveCategory('restaurant') // Set initial keyword
     }
   }, [currentLocation, currentSearchQuery, activeCategory, searchPlacesByQuery, setActiveCategory])
 
@@ -104,6 +105,13 @@ export default function Home() {
     collapsed: { height: '10vh', transition: { duration: 0.3, ease: 'easeOut' } },
   }
 
+  // Function to get category name from keyword
+  const getCategoryName = (keyword: string | null) => {
+    if (!keyword) return 'Search Results';
+    const category = categories.find(cat => cat.keyword === keyword);
+    return category ? category.name : 'Search Results';
+  };
+
   return (
     <div className="h-screen w-full">
       <Header
@@ -125,7 +133,7 @@ export default function Home() {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="absolute inset-0 flex items-center justify-center p-4 rounded-4xl z-30"
+                className="absolute inset-0 flex items-center justify-center md:p-4 p-2 rounded-4xl z-30"
               >
                 <CityInfoPanel
                   cityName={cityForInfo}
@@ -142,7 +150,7 @@ export default function Home() {
                 exit="exit"
                 className="flex w-full h-full justify-center items-center"
               >
-                <div className={`flex flex-col md:flex-col xl:flex-row w-full h-full gap-4 ${isMobile ? 'p-2' : 'md:p-4 p-1'} items-stretch`}>
+                <div className={`flex flex-col md:flex-col xl:flex-row w-full h-full gap-4 ${isMobile ? 'p-2' : 'md:p-4 p-1'} items-stretch relative z-0`}>
                   {/* MapPanel: Collapsible on mobile (350px-560px) */}
                   <motion.div
                     className="card w-full xl:w-[55%] xl:order-2 order-1 xl:h-full md:rounded-3xl rounded-xs overflow-hidden "
@@ -206,7 +214,7 @@ export default function Home() {
 
                   {/* PlaceList: Collapsible on mobile (350px-560px) */}
                   <motion.div
-                    className="card w-full xl:w-[45%] xl:order-1 order-2 xl:h-full md:rounded-3xl rounded-xs overflow-hidden bg-white md:p-4 p-1 xl:pb-4 md:pb-2"
+                    className="card w-full xl:w-[45%] xl:order-1 order-2 xl:h-full md:rounded-3xl rounded-xs overflow-hidden bg-white md:p-4 p-1 xl:pb-4 md:pb-2 relative z-20"
                     variants={mobilePanelVariants}
                     animate={isMobile ? (isMapExpanded ? 'collapsed' : 'expanded') : 'expanded'}
                   >
@@ -234,8 +242,10 @@ export default function Home() {
                         </div>
                       ) : (
                         <>
-                          <h2 className="text-[20px] font-bold text-gray-700 mb-2 pt-4 px-4 sticky top-0 z-10 bg-white">
-                            Search Results
+                          <h2 className="text-[20px] font-bold text-gray-700 mb-2 pt-4 px-4 sticky top-0 z-10">
+                            {activeCategory
+                              ? `${getCategoryName(activeCategory)} near you`
+                              : 'Search Results'}
                           </h2>
                           <div className="overflow-y-scroll h-[calc(100%-60px)] px-1 scrollbar-w-2 scrollbar-track-gray-200 scrollbar-thumb-rose-500 rounded-lg">
                             {displayError && !isLoading && (
@@ -255,7 +265,7 @@ export default function Home() {
 
                   {/* PlaceIcons: Fixed height, hidden on mobile */}
                   {!isMobile && (
-                    <div className="w-full xl:w-[5%] xl:order-0 order-3 h-[10vh] xl:h-full md:w-auto md:h-[10vh] md:flex md:justify-center md:overflow-visible overflow-hidden rounded-t-0">
+                    <div className="w-full xl:w-[5%] xl:order-0 order-3 h-[10vh] xl:h-full md:w-auto md:h-[10vh] md:flex md:justify-center md:overflow-visible overflow-hidden rounded-t-0 relative z-50">
                       <PlaceIcons
                         onSelectCategory={handleCategorySelectWrapper}
                         selectedCategory={activeCategory}

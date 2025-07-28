@@ -12,10 +12,10 @@ let BankIcon = `<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2
 
 export default [
   { id: 1, name: "Restaurants", icon: RestaurantIcon, keyword: "restaurant" },
-  { id: 2, name: "Gas Station", icon: GasStationIcon, keyword: "gas_station" },
-  { id: 3, name: "Grocery", icon: SupermarketIcon, keyword: "supermarket" },
+  { id: 2, name: "Gas Stations", icon: GasStationIcon, keyword: "gas_station" },
+  { id: 3, name: "Grocery Stores", icon: SupermarketIcon, keyword: "supermarket" },
   { id: 4, name: "Bed and Breakfast", icon: LodgingIcon, keyword: "lodging" },
   { id: 5, name: "Night Club", icon: BarIcon, keyword: "bar" },
-  { id: 6, name: "Hotel", icon: HotelIcon, keyword: "hotel" },
-  { id: 7, name: "Bank", icon: BankIcon, keyword: "bank" },
+  { id: 6, name: "Hotels", icon: HotelIcon, keyword: "hotel" },
+  { id: 7, name: "Banks", icon: BankIcon, keyword: "bank" },
 ];
